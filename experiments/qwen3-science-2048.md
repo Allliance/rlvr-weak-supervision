@@ -22,3 +22,9 @@ Checkpoint 5 passed CPU deserialization, all 311 model tensor shape/finiteness
 checks, 310 initialized Adam states, scheduler step 5, all four RNG states, and
 dataloader-state checks. This is startup evidence; the 480-update experiment is
 still running and no final improvement is claimed.
+
+Resume verification: model, optimizer, scheduler, RNG and dataloader state were
+restored from checkpoint 5 in the retained allocation. Updates 6–10 then completed
+with finite metrics, and checkpoint 10 was committed with all four complete
+archives. Durable supervision and remote W&B logging remain active toward 480
+updates; the full training result is pending.
