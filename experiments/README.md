@@ -11,7 +11,7 @@ The live shared index is `origin/experiment-queue:experiments/README.md`. Main a
 
 | Priority | Experiment | Resources | Host | Claim | Job | Started | Ended | W&B | Status |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | [Qwen3-1.7B science 2048](qwen3-science-2048.md) | gpu=1; vram=288GiB; cpu=16; ram=128GiB | aac16-ele-priv-ctl-2 | b658f544cc6b2f70:science2048-20261022 | 49923 | 2026-10-22T04:30:50+00:00 | — | [run](https://forge.coreweave.com/wandb/alliance/Noisy-RLVR/runs/q3science2048s42_20261022) | training; 2/480 updates |
+| 1 | [Qwen3-1.7B science 2048](qwen3-science-2048.md) | gpu=1; vram=288GiB; cpu=16; ram=128GiB | aac16-ele-priv-ctl-2 | b658f544cc6b2f70:science2048-20261022 | 49923 | 2026-10-22T04:30:50+00:00 | — | [run](https://forge.coreweave.com/wandb/alliance/Noisy-RLVR/runs/q3science2048s42_20261022) | starting; 5/480 updates |
 
 ## Finished Experiments
 
