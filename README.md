@@ -138,6 +138,32 @@ See `scripts/rl/train.sh` for the full list of configurable options and `REWARD_
 
 ---
 
+## Qwen3 science on AMD
+
+The authorized 2,048-example Qwen3-1.7B adaptation is documented in
+[the science protocol](experiments/qwen3-science-2048.md). The [live experiment
+queue](https://github.com/Allliance/rlvr-weak-supervision/blob/experiment-queue/experiments/README.md)
+is published separately from reviewed source code.
+
+`scripts/rl/train_science.sh` runs the published science prompts and clean
+rule-based rewards through an independently installed AMD-compatible verl
+runtime. Set `RUN_ROOT`, `BASE_MODEL`, and, if needed,
+`SCIENCE_DEPENDENCIES` to local prepared artifacts; the run directory contains
+normalized Parquet files with unchanged prompts and labels. The launcher must
+run inside a scheduler allocation exposing exactly one GPU. It does not allocate
+resources or install dependencies.
+
+`tools/science_control.py --profile /private/controller.json` supervises the
+allowlisted experiment, publishes its claimed queue row, and performs bounded
+checkpoint recovery and allocation renewal. Host paths, scheduler settings,
+container launchers and credentials are private machine configuration. Install
+it under the host service manager with automatic restart and a four-minute
+systemd watchdog. Put `STOP` in the run directory to stop this workload and
+latch all automatic recovery while retaining its allocation. Do not reuse an
+old experiment's stop latch or remove it to obtain a free GPU.
+
+---
+
 ## Evaluation
 
 Evaluate a trained checkpoint across multiple datasets:
