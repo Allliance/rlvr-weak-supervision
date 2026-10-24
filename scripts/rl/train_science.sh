@@ -13,7 +13,9 @@ export WANDB_RUN_ID
 export WANDB_RESUME=allow WANDB_DIR="$RUN_ROOT"
 TOTAL_TRAINING_STEPS=${TOTAL_TRAINING_STEPS:-480}
 TOTAL_EPOCHS=${TOTAL_EPOCHS:-15}
-if [[ "$WANDB_RUN_ID" != q3science2048s42_20261022 ]]; then
+config_only=false
+if [[ ${SCIENCE_CONFIG_ONLY:-0} == 1 && " $* " == *" --cfg job "* ]]; then config_only=true; fi
+if [[ "$WANDB_RUN_ID" != q3science2048s42_20261022 && "$config_only" != true ]]; then
   # Only the historical full-clean identity may use its existing preparation.
   # Every comparison arm binds its own data, tokenizer filter and checkpoint root.
   TOTAL_EPOCHS=$(python - "$RUN_ROOT" "$WANDB_RUN_ID" <<'PY'

@@ -224,10 +224,12 @@ print(json.dumps(found))
         self.publish_pending()
 
     def row(self):
+        preparation=('; preparing '+str(self.s.get('verified_noisy_rows',0))+'/1843 verified noisy labels') \
+            if self.p.get('noise_generation') and not (self.root/'data/NOISY_DATA_READY').exists() else ''
         values = [str(self.p.get('priority', 10)), '[' + self.p['name'] + '](' + self.p['record'] + ')',
                   self.p['resources'], self.p['owner'], self.p['claim'], str(self.p['job_id']),
                   self.s.get('started_utc', '—'), self.s.get('ended_utc', '—'),
-                  '[run](' + self.p['run_url'] + ')', self.s['status'] + '; ' + str(self.s['completed_updates']) + '/480 updates']
+                  '[run](' + self.p['run_url'] + ')', self.s['status'] + preparation + '; ' + str(self.s['completed_updates']) + '/480 updates']
         return '| ' + ' | '.join(values) + ' |'
 
     def bootstrap(self):
@@ -340,6 +342,13 @@ print(json.dumps(found))
                 self.persist()
                 self.queue(publish=True)
                 return
+            if self.p.get('noise_generation') and not (self.root/'data/NOISY_DATA_READY').exists():
+                progress=self.root/'data/noise-progress.json'
+                if progress.exists():
+                    actual=json.loads(progress.read_text())
+                    if actual.get('verified_rows',0)>self.s.get('verified_noisy_rows',0):
+                        self.s.update(verified_noisy_rows=actual['verified_rows'],last_progress=time.time())
+                    self.s['preparation_phase']=actual['phase']
         super().tick()
 
 
