@@ -306,7 +306,11 @@ def worker_loop(profile):
     gpu = {}
     sequence = 0
     last_use = time.time()
+    cleaned = set()
     while True:
+        if child is not None and child.poll() is not None and token not in cleaned:
+            stop_token(token)
+            cleaned.add(token)
         request = root / 'supervisor/start.json'
         if request.exists():
             action = json.loads(request.read_text())
