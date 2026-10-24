@@ -21,7 +21,7 @@ Evaluate SCP difficult-50, SciBench and GPQA before training and every 25 update
 
 ## Main Finding (Running)
 
-Allocated on Misha/r817u15n02; optimizer startup pending. Native verl 0.5.0/CUDA execution is a runtime adaptation of the existing ROCm science protocol; compare with that version difference disclosed.
+Training active: at least 3/480 finite optimizer updates with LR 1e-6 and uploaded optimizer metrics in W&B. First-checkpoint validation is running independently in CPU supervision; startup is not yet fully verified. No completed comparison result is claimed. Native verl 0.5/CUDA is the documented adaptation of the legacy ROCm science protocol; retain that framework difference when comparing results.
 
 ## Events
 
