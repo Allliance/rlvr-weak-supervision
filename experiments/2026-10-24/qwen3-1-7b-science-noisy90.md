@@ -4,8 +4,8 @@ Experiment group: [Qwen3-1.7B science comparison](group--qwen3-1-7b-science-2048
 # Qwen3-1.7B science · 90% noisy pool
 
 Agent ID: `codex:01a16e48-bd19-7990-9cba-1dbf720faa54:/root`
-Machine ID: unassigned
-W&B: —
+Machine ID: `machine:sha256:54d325dcb906a630c9c82e39451b3688533305d1a7a627d37f4c72734a0f290b`
+W&B: [run](https://wandb.ai/alliance/Noisy-RLVR/runs/q3sciencenoisy90s42_20261024)
 
 ## Goal
 
@@ -19,9 +19,9 @@ Inherit the existing [Qwen science protocol](../qwen3-science-2048.md): GRPO, 48
 
 Evaluate SCP difficult-50, SciBench and GPQA before training and every 25 updates; save full state every five updates and at the endpoint. Re-audit tokenizer filtering and exact question overlap per arm; report SCP both with and without overlapping questions. The existing Qwen SCP evaluation overlaps training and must remain labeled a contaminated diagnostic. Publish source revision, exact data/model hashes and execution calibration to W&B only after an allocated claim wins. No new run is created while unassigned. First-observed request time is approximate; exact message timestamp was unavailable.
 
-## Main Finding
+## Main Finding (Running)
 
-Queued; no allocation or execution claim. Waiting for approved cluster budget and model/runtime preflight. The allocated noisy pipeline generates and audits targets before any optimizer update; an incomplete audit blocks training. Existing full-clean Qwen results are not evidence for these new conditions.
+Allocated on Misha/r817u15n02; optimizer startup pending. Native verl 0.5.0/CUDA execution is a runtime adaptation of the existing ROCm science protocol; compare with that version difference disclosed.
 
 ## Events
 
