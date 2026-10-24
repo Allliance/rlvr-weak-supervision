@@ -29,6 +29,40 @@ def fields(job):
 
 
 class Native(Controller):
+    def ensure_manager(self):
+        error=self.root/'supervisor/manager-error.json'
+        if error.exists() and json.loads(error.read_text()).get('job_id')==self.p['job_id']:
+            raise ValueError('Native GPU manager failed; inspect manager-error.json before recovery')
+        probe='''import json,os,sys
+from pathlib import Path
+found=[]
+for p in Path('/proc').iterdir():
+ if not p.name.isdigit():continue
+ try:
+  a=(p/'cmdline').read_bytes().split(b'\\0'); e=(p/'environ').read_bytes().split(b'\\0')
+  if p.stat().st_uid==os.getuid() and b'--worker' in a and os.fsencode(sys.argv[1]) in a and ('SLURM_JOB_ID='+sys.argv[2]).encode() in e:found.append(int(p.name))
+ except OSError:pass
+print(json.dumps(found))
+'''
+        environment={key:value for key,value in os.environ.items()
+                     if not key.startswith('SLURM_') and key not in ('CUDA_VISIBLE_DEVICES','HIP_VISIBLE_DEVICES','ROCR_VISIBLE_DEVICES')}
+        prefix=['srun','--jobid='+str(self.p['job_id']),'--overlap','--exact','--nodes=1','--ntasks=1']
+        observed=subprocess.run(prefix+['--cpus-per-task=1','--mem=256M','--gres=none','/usr/bin/python3','-S','-c',probe,self.p['profile'],str(self.p['job_id'])],
+            env=environment,capture_output=True,text=True,timeout=60,check=True)
+        managers=json.loads(observed.stdout.strip())
+        if len(managers)>1:raise ValueError('More than one exact native GPU manager exists')
+        if managers:return
+        starts=self.s.setdefault('manager_starts',[])
+        recent=[value for value in starts if time.time()-value<21600]
+        if len(recent)>=3:raise ValueError('Bounded native manager recovery exhausted')
+        starts.append(time.time());self.persist()
+        cpus=next(value.split('=',1)[1] for value in self.p['sbatch_args'] if value.startswith('--cpus-per-task='))
+        memory=next(value.split('=',1)[1] for value in self.p['sbatch_args'] if value.startswith('--mem='))
+        with (self.root/'supervisor/manager-restart.log').open('a') as log:
+            subprocess.Popen(prefix+['--cpus-per-task='+cpus,'--mem='+memory,'--gres=gpu:1',
+                '/usr/bin/python3','-S',self.p['code']+'/tools/science_slurm.py','--worker','--profile',self.p['profile']],
+                env=environment,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
+
     def publish_pending(self):
         for _ in range(5):
             self.git('fetch','--quiet','origin','refs/heads/experiment-queue')
@@ -298,6 +332,14 @@ class Native(Controller):
         if not self.bootstrap():
             self.persist()
             return
+        if self.allocation()[0]=='RUNNING' and self.s['status'] not in ('completed','user_stopped','needs_attention'):
+            self.ensure_manager()
+            health=self.health()
+            if health.get('job_id')!=self.p['job_id'] or not health.get('manager_ready'):
+                self.s['status']='GPU preflight; optimizer startup pending'
+                self.persist()
+                self.queue(publish=True)
+                return
         super().tick()
 
 
@@ -320,6 +362,8 @@ def worker_loop(profile):
     job = int(os.environ['SLURM_JOB_ID'])
     if fields(job)['JobState'] != 'RUNNING':
         raise RuntimeError('Worker allocation is unavailable')
+    save(root/'supervisor/worker.json',dict(job_id=job,token=None,running=False,
+        manager_pid=os.getpid(),manager_ready=False,phase='gpu_preflight',checked_epoch=time.time()))
     probe='''import json,torch,uuid
 assert torch.cuda.device_count()==1
 p=torch.cuda.get_device_properties(0);free,total=torch.cuda.mem_get_info()
@@ -411,7 +455,8 @@ print(json.dumps(dict(name=p.name,total_bytes=total,free_bytes=free,uuid=str(p.u
         sequence += 1
         health = dict(job_id=job, token=token, running=child is not None and child.poll() is None,
                       child_pid=child.pid if child else None, returncode=child.poll() if child else None,
-                      checked_epoch=time.time(), checked_utc=utc(), memory=memory, gpu=gpu, sequence=sequence)
+                      checked_epoch=time.time(), checked_utc=utc(), memory=memory, gpu=gpu, sequence=sequence,
+                      manager_pid=os.getpid(),manager_ready=True)
         save(root/'supervisor/worker.json', health)
         time.sleep(2)
 
@@ -420,6 +465,10 @@ def worker(profile):
     p=json.loads(Path(profile).read_text())
     try:
         worker_loop(profile)
+    except Exception as exc:
+        save(Path(p['root'])/'supervisor/manager-error.json',dict(job_id=int(os.environ['SLURM_JOB_ID']),
+            checked_utc=utc(),error=type(exc).__name__+': '+str(exc)))
+        raise
     finally:
         path=Path(p['root'])/'supervisor/worker.json'
         if path.exists():
