@@ -56,5 +56,20 @@ class SlurmControls(unittest.TestCase):
             self.controller.launch(recovery=True)
         self.assertFalse((self.root/'supervisor/start.json').exists())
 
+    def test_ambiguous_gpu_managers_never_create_another_producer(self):
+        result=type('Result',(),{'stdout':'[111, 222]'})()
+        with patch.object(science_slurm.subprocess,'run',return_value=result), \
+             patch.object(science_slurm.subprocess,'Popen') as launch:
+            with self.assertRaisesRegex(ValueError,'More than one exact'):
+                self.controller.ensure_manager()
+            launch.assert_not_called()
+
+    def test_diagnosed_manager_error_blocks_automatic_replay(self):
+        (self.root/'supervisor/manager-error.json').write_text(json.dumps(dict(job_id=0,error='GPU preflight failed')))
+        with patch.object(science_slurm.subprocess,'Popen') as launch:
+            with self.assertRaisesRegex(ValueError,'inspect manager-error'):
+                self.controller.ensure_manager()
+            launch.assert_not_called()
+
 
 if __name__=='__main__':unittest.main()

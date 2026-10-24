@@ -362,6 +362,13 @@ def worker_loop(profile):
     job = int(os.environ['SLURM_JOB_ID'])
     if fields(job)['JobState'] != 'RUNNING':
         raise RuntimeError('Worker allocation is unavailable')
+    previous_token=None
+    previous_path=root/'supervisor/worker.json'
+    if previous_path.exists():
+        previous=json.loads(previous_path.read_text())
+        if previous.get('job_id')==job and previous.get('token'):
+            previous_token=previous['token']
+            stop_token(previous_token)
     save(root/'supervisor/worker.json',dict(job_id=job,token=None,running=False,
         manager_pid=os.getpid(),manager_ready=False,phase='gpu_preflight',checked_epoch=time.time()))
     probe='''import json,torch,uuid
@@ -378,12 +385,7 @@ print(json.dumps(dict(name=p.name,total_bytes=total,free_bytes=free,uuid=str(p.u
     child = None
     token = None
     seen = set()
-    prior_path=root/'supervisor/worker.json'
-    if prior_path.exists():
-        prior=json.loads(prior_path.read_text())
-        if prior.get('job_id') == job and prior.get('token'):
-            stop_token(prior['token'])
-            seen.add(prior['token'])  # CPU supervision owns checkpoint-safe recovery.
+    if previous_token:seen.add(previous_token)  # CPU supervision owns checkpoint-safe recovery.
     last_gpu = 0
     gpu = {}
     sequence = 0
