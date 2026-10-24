@@ -5,7 +5,7 @@ Experiment group: Qwen3-1.7B science comparison
 
 Agent ID: `codex:01a16e48-bd19-7990-9cba-1dbf720faa54:/root`
 Machine ID: `machine:sha256:500e99e365d73bad6111ad4fa944b2b54a9728178cee7d4d578a3f8bf2bec396`
-W&B: [existing full clean](https://forge.coreweave.com/wandb/alliance/Noisy-RLVR/runs/q3science2048s42_20261022) · [1% clean](https://wandb.ai/alliance/Noisy-RLVR/runs/q3scienceclean1s42_20261024) · [10% clean](https://wandb.ai/alliance/Noisy-RLVR/runs/q3scienceclean10s42_20261024)
+W&B: [existing full clean](https://forge.coreweave.com/wandb/alliance/Noisy-RLVR/runs/q3science2048s42_20261022) · [1% clean](https://wandb.ai/alliance/Noisy-RLVR/runs/q3scienceclean1s42_20261024) · [10% clean](https://wandb.ai/alliance/Noisy-RLVR/runs/q3scienceclean10s42_20261024) · [90% noisy](https://wandb.ai/alliance/Noisy-RLVR/runs/q3sciencenoisy90s42_20261024)
 
 ## Goal
 
@@ -24,7 +24,7 @@ Start each new condition from `Qwen/Qwen3-1.7B`. Use the published qwen-math-1.5
 
 ## Main Finding (Running)
 
-The two new clean arms have allocated H100 GPUs and are in startup/recovery. The existing full-clean trajectory remains interrupted at its last verified remote upload, 467/480 updates, on its original controller. No completed science comparison is claimed. Noisy preparation is queued and must pass its audit before training.
+All three new conditions have allocated GPUs on Misha: clean1 uses an A100 80GB, clean10 an H100 80GB, and noisy90 an H200. Clean arms are in corrected runtime startup; noisy90 is generating a fixed audited label set before training. Isolated Math-Verify 0.8.0 and latex2sympy2_extended 1.10.2 pass positive/negative controls in both teacher and actual learner reward paths. All new native CUDA arms use the pinned verl 0.5 source; the legacy full-clean run used the documented ROCm verl 0.9 adaptation, so this framework difference must accompany comparisons. That existing full-clean trajectory remains interrupted at its last verified remote upload, 467/480 updates, on its original inaccessible controller. No completed science comparison is claimed.
 
 ## Events
 

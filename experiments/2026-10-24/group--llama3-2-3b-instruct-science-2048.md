@@ -24,7 +24,7 @@ Start each new condition from `meta-llama/Llama-3.2-3B-Instruct`. Use the publis
 
 ## Main Finding
 
-Queued; no result for the newly requested conditions. Reuse the existing Qwen full-clean run rather than duplicate it. No new W&B identity before allocation and a successful execution claim.
+All four GPU candidates are submitted on Bouchet and pending Slurm priority: full clean 30601546, clean10 30601547, clean1 30601548, noisy90 30609819. Durable CPU controllers are active. Exact resolved launch configurations and positive/negative controls in both the teacher and actual learner reward paths passed with isolated Math-Verify 0.8.0 and latex2sympy2_extended 1.10.2. Native CUDA execution uses the pinned verl 0.5 source. GPU calibration and verified startup remain pending allocation; no scientific result or W&B identity is claimed before an actual allocated winner.
 
 ## Events
 
