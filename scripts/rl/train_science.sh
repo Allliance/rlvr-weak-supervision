@@ -5,6 +5,11 @@ code=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)
 : "${RUN_ROOT:?Set RUN_ROOT to persistent experiment storage}"
 : "${BASE_MODEL:?Set BASE_MODEL to the pinned model bundle}"
 mkdir -p "$RUN_ROOT/checkpoints" "$RUN_ROOT/logs"
+if [[ ${SCIENCE_RUNTIME:-} == verl05 ]]; then
+  unset ROCR_VISIBLE_DEVICES HIP_VISIBLE_DEVICES GPU_DEVICE_ORDINAL
+  runtime_prefix=$(python -c 'import sys; print(sys.prefix)')
+  export LD_LIBRARY_PATH="$runtime_prefix/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+fi
 export REWARD_MODEL_TYPE=RULE_BASED
 export WANDB_ENTITY=alliance WANDB_PROJECT=Noisy-RLVR
 : "${WANDB_RUN_ID:?Set the allocated experiment's own W&B identity}"

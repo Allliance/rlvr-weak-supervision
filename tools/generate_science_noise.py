@@ -38,6 +38,14 @@ print(json.dumps([m.compute_score(boxed,reference),m.compute_score(boxed,target)
 
 
 def main():
+    library=str(Path(sys.prefix)/'lib')
+    environment=dict(os.environ)
+    for name in ['ROCR_VISIBLE_DEVICES','HIP_VISIBLE_DEVICES','GPU_DEVICE_ORDINAL']:environment.pop(name,None)
+    if library not in environment.get('LD_LIBRARY_PATH','').split(':'):
+        environment['LD_LIBRARY_PATH']=library+(':'+environment['LD_LIBRARY_PATH'] if environment.get('LD_LIBRARY_PATH') else '')
+        os.execve(sys.executable,[sys.executable,*sys.argv],environment)
+    os.environ.update(environment)
+    for name in ['ROCR_VISIBLE_DEVICES','HIP_VISIBLE_DEVICES','GPU_DEVICE_ORDINAL']:os.environ.pop(name,None)
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source',type=Path,required=True)
     parser.add_argument('--teacher',required=True)
