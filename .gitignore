@@ -89,3 +89,6 @@ Thumbs.db
 
 LLaMA-Factory/mid_train_sft_data/
 outputs/
+
+# Local operational artifacts
+scratch/
