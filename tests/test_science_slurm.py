@@ -85,8 +85,10 @@ class SlurmControls(unittest.TestCase):
             self.assertEqual(result['fraction'],.625)
 
     def test_duplicate_manager_leaves_live_workload_and_health_untouched(self):
+        profile=json.loads(self.profile.read_text())
         with patch.dict(science_slurm.os.environ,SLURM_JOB_ID='42'), \
              patch.object(science_slurm.Path,'open',unittest.mock.mock_open()), \
+             patch.object(science_slurm.json,'loads',return_value=profile), \
              patch.object(science_slurm.fcntl,'flock',side_effect=BlockingIOError), \
              patch.object(science_slurm,'worker_loop') as loop, \
              patch.object(science_slurm,'stop_token') as stop:
