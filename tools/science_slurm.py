@@ -133,8 +133,11 @@ class Native(Controller):
             if len(rows) != 1 or rows[0][1] != str(os.getuid()):
                 raise ValueError('Exact ended allocation is unverified')
             if rows[0][2].startswith('CANCELLED'):
-                (self.root/'STOP').touch()
-                self.s.update(status='user_stopped',reason='Allocation cancelled; no automatic restart')
+                if (self.root/'supervisor'/f'idle-release-{self.p["job_id"]}.json').exists():
+                    self.s.update(status='needs_attention',reason='Sustained GPU idleness required allocation release')
+                else:
+                    (self.root/'STOP').touch()
+                    self.s.update(status='user_stopped',reason='Allocation cancelled; no automatic restart')
                 return
         token = self.p['claim'] + '-lease-' + str(self.s['renewals'] + 1)
         matches = [line.split('|')[0] for line in run(['squeue', '-h', '-u', str(os.getuid()), '-o', '%i|%k']).splitlines()
@@ -200,6 +203,11 @@ class Native(Controller):
                 raise ValueError('Another allocated winner owns this condition')
             if self.allocation()[0] != 'RUNNING':
                 return False
+            actual=fields(self.p['job_id'])
+            self.p['provenance']['actual_allocation']={k:actual.get(k) for k in
+                ['JobId','NodeList','AllocTRES','StartTime','EndTime','Partition']}
+            resolved=self.root/'supervisor/resolved-launch.yaml'
+            self.p['provenance']['resolved_config_yaml']=resolved.read_text()
             self.s.setdefault('started_utc', utc())
             self.s['status'] = 'allocated; logging initialization'
             replacement = self.row().replace('[run](' + self.p['run_url'] + ')', '—')
@@ -388,6 +396,9 @@ def main():
                 except Exception as stop_error:controller.s['protective_stop_error']=str(stop_error)
                 controller.s.update(status='needs_attention',reason=str(exc),ended_utc=utc())
                 controller.persist()
+                if controller.p.get('logging_ready'):
+                    try:controller.queue(publish=True)
+                    except Exception as publication:controller.s['publication_error']=str(publication);controller.persist()
                 print(utc(),type(exc).__name__,str(exc),flush=True)
             except Exception as exc:
                 controller.s['observation_error']=type(exc).__name__+': '+str(exc)
