@@ -43,9 +43,13 @@ if [[ -n "${RESUME_CHECKPOINT:-}" ]]; then
 fi
 strategy=fsdp2
 reward_args=("reward.custom_reward_function.path=$code/reward_function.py" reward.custom_reward_function.name=compute_score reward.num_workers=4)
+ray_cpu=ray_kwargs.ray_init.num_cpus=16
+dataset_args=()
 if [[ ${SCIENCE_RUNTIME:-} == verl05 ]]; then
   strategy=fsdp
   reward_args=("custom_reward_function.path=$code/reward_function.py" custom_reward_function.name=compute_score)
+  ray_cpu=ray_init.num_cpus=16
+  dataset_args=("data.custom_cls.path=$code/tools/science_dataset.py" data.custom_cls.name=NoThinkingDataset)
 fi
 python -m verl.trainer.main_ppo \
   algorithm.adv_estimator=grpo \
@@ -58,6 +62,7 @@ python -m verl.trainer.main_ppo \
   data.filter_overlong_prompts=true data.truncation=error \
   data.dataloader_num_workers=2 \
   '+data.apply_chat_template_kwargs.enable_thinking=false' \
+  "${dataset_args[@]}" \
   actor_rollout_ref.model.path="$BASE_MODEL" \
   actor_rollout_ref.model.use_remove_padding=true \
   actor_rollout_ref.model.enable_gradient_checkpointing=true \
@@ -110,4 +115,4 @@ python -m verl.trainer.main_ppo \
   trainer.resume_mode=auto trainer.default_hdfs_dir=null \
   trainer.rollout_data_dir="$RUN_ROOT/rollouts" \
   trainer.validation_data_dir="$RUN_ROOT/validation" \
-  ray_kwargs.ray_init.num_cpus=16 "${resume[@]}" "$@"
+  "$ray_cpu" "${resume[@]}" "$@"
