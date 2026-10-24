@@ -32,8 +32,9 @@ def working_memory(text=None, mount=Path('/sys/fs/cgroup')):
     text=Path('/proc/self/cgroup').read_text() if text is None else text
     entries=[line.split(':',2) for line in text.splitlines()]
     unified=next((row[2] for row in entries if row[0]=='0' and row[1]==''),None)
-    version=2 if unified is not None else 1
-    relative=unified if version==2 else next((row[2] for row in entries if 'memory' in row[1].split(',')),None)
+    legacy=next((row[2] for row in entries if 'memory' in row[1].split(',')),None)
+    version=1 if legacy is not None else 2
+    relative=legacy if version==1 else unified
     if relative is None:raise RuntimeError('Memory cgroup is unavailable')
     base=mount if version==2 else mount/'memory'
     current=base/relative.lstrip('/');observations=[]
@@ -184,7 +185,9 @@ print(json.dumps(found))
         if self.s['completed_updates'] and not step:
             raise ValueError('Complete recovery checkpoint is unavailable')
         if step:
-            env = dict(os.environ, CUDA_VISIBLE_DEVICES='', HIP_VISIBLE_DEVICES='', ROCR_VISIBLE_DEVICES='')
+            env = {key:value for key,value in os.environ.items()
+                   if not key.startswith('SLURM_') and key not in
+                   ('CUDA_VISIBLE_DEVICES','HIP_VISIBLE_DEVICES','ROCR_VISIBLE_DEVICES','GPU_DEVICE_ORDINAL')}
             subprocess.run(['srun', '--jobid=' + str(self.p['job_id']), '--overlap', '--exact',
                 '--nodes=1', '--ntasks=1', '--cpus-per-task=2', '--mem=48G', '--gres=none',
                 self.p['python'], self.p['code'] + '/tools/verify_science_checkpoint.py',
@@ -243,6 +246,7 @@ print(json.dumps(found))
         self.p['job_id'] = int(job)
         save(self.p['profile'], self.p)
         self.s['renewals'] += 1
+        self.s.pop('manager_starts', None)  # Recovery bounds apply to this allocation.
         self.s.pop('pending_submission', None)
         self.s.pop('container', None)
         self.s.pop('container_id', None)
@@ -492,6 +496,11 @@ print(json.dumps(dict(name=p.name,total_bytes=total,free_bytes=free,uuid='GPU-'+
 
 def worker(profile):
     p=json.loads(Path(profile).read_text())
+    # A delayed srun can race the controller's process probe. Never let a second
+    # manager touch the first manager's token, health file or workload.
+    lock=Path('/dev/shm',f'rlvr-science-manager-{os.getuid()}-{os.environ["SLURM_JOB_ID"]}.lock').open('a')
+    try:fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+    except BlockingIOError:return
     try:
         worker_loop(profile)
     except Exception as exc:

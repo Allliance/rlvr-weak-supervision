@@ -79,10 +79,19 @@ class SlurmControls(unittest.TestCase):
             (path/('memory.usage_in_bytes' if version==1 else 'memory.current')).write_text('3584')
             prefix='total_' if version==1 else ''
             (path/'memory.stat').write_text(prefix+'inactive_file 512\n'+prefix+'active_file 512\n')
-            result=science_slurm.working_memory('8:memory:/job\n' if version==1 else '0::/job\n',base)
+            result=science_slurm.working_memory('0::/unified\n8:memory:/job\n' if version==1 else '0::/job\n',base)
             self.assertEqual(result['cgroup_version'],version)
             self.assertEqual(result['used_bytes'],2560)
             self.assertEqual(result['fraction'],.625)
+
+    def test_duplicate_manager_leaves_live_workload_and_health_untouched(self):
+        with patch.dict(science_slurm.os.environ,SLURM_JOB_ID='42'), \
+             patch.object(science_slurm.Path,'open',unittest.mock.mock_open()), \
+             patch.object(science_slurm.fcntl,'flock',side_effect=BlockingIOError), \
+             patch.object(science_slurm,'worker_loop') as loop, \
+             patch.object(science_slurm,'stop_token') as stop:
+            science_slurm.worker(self.profile)
+            loop.assert_not_called();stop.assert_not_called()
 
 
 if __name__=='__main__':unittest.main()
