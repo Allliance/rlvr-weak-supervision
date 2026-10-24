@@ -52,6 +52,10 @@ def main():
     parser.add_argument('--student-tokenizer',required=True)
     parser.add_argument('--output',type=Path,required=True)
     args=parser.parse_args()
+    # Missing/incompatible verifier dependencies are a startup fault, not a
+    # reason to silently discard every generated candidate for hours.
+    if scores('7','6')!=[0,1,0]:
+        raise RuntimeError('Training verifier positive/negative preflight failed')
     import pyarrow.parquet as pq
     from transformers import AutoTokenizer
     from vllm import LLM, SamplingParams
@@ -105,7 +109,7 @@ def main():
                         target=boxed_answer(candidate.text)
                         if not target or target.strip()==reference.strip():continue
                         try:wrong,self_score,normalized_wrong=scores(target,reference)
-                        except (subprocess.TimeoutExpired,subprocess.CalledProcessError,ValueError):continue
+                        except subprocess.TimeoutExpired:continue
                         if wrong!=0 or normalized_wrong!=0 or self_score!=1:continue
                         item=dict(source_row=index,target=target,verified_incorrect=True,
                             verifier='training Math-Verify rejects target against raw and unescaped reference and accepts target against itself',
