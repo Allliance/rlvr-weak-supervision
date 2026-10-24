@@ -12,7 +12,7 @@ Science groups: [Llama3.2-3B-Instruct](2026-10-24/group--llama3-2-3b-instruct-sc
 | 12 | [Llama-3.2-3B-Instruct science · 10% clean](2026-10-24/llama3-2-3b-instruct-science-clean10.md) | gpu=1; vram=179GiB; cpu=16; ram=192GiB | — | — | — | — | — | — | Candidate 62871dc8269c1148/30601547 submitted; awaiting allocation and calibrated startup |
 | 13 | [Llama-3.2-3B-Instruct science · 90% noisy pool](2026-10-24/llama3-2-3b-instruct-science-noisy90.md) | gpu=1; vram=unknown | — | — | — | — | — | — | Authorized Oct24; queued; model/runtime calibration pending; audited incorrect labels required |
 | 14 | [Llama-3.2-3B-Instruct science · 1% clean](2026-10-24/llama3-2-3b-instruct-science-clean1.md) | gpu=1; vram=179GiB; cpu=16; ram=192GiB | — | — | — | — | — | — | Candidate 62871dc8269c1148/30601548 submitted; awaiting allocation and calibrated startup |
-| 16 | [Qwen3-1.7B science · 90% noisy pool](2026-10-24/qwen3-1-7b-science-noisy90.md) | gpu=1; vram=unknown | — | — | — | — | — | — | Authorized Oct24; queued; model/runtime calibration pending; audited incorrect labels required |
+| 16 | [Qwen3-1.7B science · 90% noisy pool](2026-10-24/qwen3-1-7b-science-noisy90.md) | gpu=1; vram=80GiB; cpu=16; ram=128GiB | — | — | — | — | — | — | Candidate 54d325dcb906a630/3066735 submitted; awaiting allocation and calibrated startup |
 
 ## Running Experiments
 
