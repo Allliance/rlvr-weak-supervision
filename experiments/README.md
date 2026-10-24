@@ -13,12 +13,12 @@ Science groups: [Llama3.2-3B-Instruct](2026-10-24/group--llama3-2-3b-instruct-sc
 | 13 | [Llama-3.2-3B-Instruct science · 90% noisy pool](2026-10-24/llama3-2-3b-instruct-science-noisy90.md) | gpu=1; vram=unknown | — | — | — | — | — | — | Authorized Oct24; queued; model/runtime calibration pending; audited incorrect labels required |
 | 14 | [Llama-3.2-3B-Instruct science · 1% clean](2026-10-24/llama3-2-3b-instruct-science-clean1.md) | gpu=1; vram=unknown | — | — | — | — | — | — | Authorized Oct24; queued; model/runtime calibration pending |
 | 16 | [Qwen3-1.7B science · 90% noisy pool](2026-10-24/qwen3-1-7b-science-noisy90.md) | gpu=1; vram=unknown | — | — | — | — | — | — | Authorized Oct24; queued; model/runtime calibration pending; audited incorrect labels required |
-| 17 | [Qwen3-1.7B science · 1% clean](2026-10-24/qwen3-1-7b-science-clean1.md) | gpu=1; vram=unknown | — | — | — | — | — | — | Authorized Oct24; queued; model/runtime calibration pending |
 
 ## Running Experiments
 
 | Priority | Experiment | Resources | Host | Claim | Job | Started | Ended | W&B | Status |
 |---|---|---|---|---|---|---|---|---|---|
+| 10 | [Qwen3-1.7B-science-clean1](2026-10-24/qwen3-1-7b-science-clean1.md) | gpu=1; vram=80GiB; cpu=16; ram=128GiB | Misha/r817u15n02 | 54d325dcb906a630:6da915e5ad9646a6b282fe2081a9ca55 | 3066243 | 2026-10-24T15:34:43+00:00 | — | — | allocated; logging initialization; 0/480 updates |
 | 1 | [Qwen3-1.7B science 2048](qwen3-science-2048.md) | gpu=1; vram=288GiB; cpu=16; ram=128GiB | aac16-ele-priv-ctl-2 | b658f544cc6b2f70:science2048-20261022 | 49923 | 2026-10-22T04:30:50+00:00 | — | [run](https://forge.coreweave.com/wandb/alliance/Noisy-RLVR/runs/q3science2048s42_20261022) | Attention required: W&B crashed; last remote upload 467/480 on Oct22; controller/allocation inaccessible from Misha and Bouchet; checkpoints unverified; preserve owner claim |
 
 ## Finished Experiments
