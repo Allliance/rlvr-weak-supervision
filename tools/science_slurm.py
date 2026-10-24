@@ -51,7 +51,7 @@ def working_memory(text=None, mount=Path('/sys/fs/cgroup')):
                                      cgroup_version=version,path=str(path)))
         except (OSError,ValueError):continue
     if not observations:raise RuntimeError('Finite native cgroup memory limit unavailable')
-    return min(observations,key=lambda item:item['limit_bytes'])
+    return max(observations,key=lambda item:item['fraction'])
 
 
 class Native(Controller):
@@ -412,11 +412,14 @@ p=torch.cuda.get_device_properties(0);free,total=torch.cuda.mem_get_info()
 assert total>=79_000_000_000 and free>=total*.90
 x=torch.ones((1024,1024),device='cuda',dtype=torch.bfloat16)
 assert torch.isfinite(x@x).all();torch.cuda.synchronize()
-print(json.dumps(dict(name=p.name,total_bytes=total,free_bytes=free,uuid=str(p.uuid),logical_device=0,torch=torch.__version__,cuda=torch.version.cuda)))
+raw=p.uuid
+device_uuid=uuid.UUID(bytes=raw) if isinstance(raw,bytes) and len(raw)==16 else uuid.UUID(str(raw).removeprefix('GPU-'))
+print(json.dumps(dict(name=p.name,total_bytes=total,free_bytes=free,uuid='GPU-'+str(device_uuid),logical_device=0,torch=torch.__version__,cuda=torch.version.cuda)))
 '''
     proof=subprocess.run([p['python'],'-c',probe],capture_output=True,text=True,
                          timeout=300,check=True,env=dict(os.environ,**p['env']))
-    save(root/'supervisor/gpu-preflight.json',json.loads(proof.stdout.strip().splitlines()[-1]))
+    cuda_proof=json.loads(proof.stdout.strip().splitlines()[-1])
+    save(root/'supervisor/gpu-preflight.json',cuda_proof)
     child = None
     token = None
     seen = set()
@@ -460,13 +463,15 @@ print(json.dumps(dict(name=p.name,total_bytes=total,free_bytes=free,uuid=str(p.u
             except subprocess.TimeoutExpired:pass
             if child.poll() is None:raise RuntimeError('Exact workload termination failed')
         if time.time() - last_gpu >= 60:
-            identity = os.environ.get('SLURM_JOB_GPUS', '')
-            if not identity or ',' in identity:raise RuntimeError('Expected one scheduler-assigned physical GPU')
+            identity = os.environ.get('SLURM_STEP_GPUS') or os.environ.get('SLURM_JOB_GPUS') or 'unavailable'
+            if ',' in identity:raise RuntimeError('Expected one scheduler-assigned physical GPU')
             telemetry = subprocess.run(['nvidia-smi',
                 '--query-gpu=uuid,name,memory.total,memory.used,utilization.gpu', '--format=csv,noheader,nounits'],
                 capture_output=True,text=True,timeout=15,check=True)
             if len(telemetry.stdout.strip().splitlines()) != 1:
                 raise RuntimeError('NVML exposure does not match the one-GPU allocation')
+            if telemetry.stdout.strip().split(',')[0].strip()!=cuda_proof['uuid']:
+                raise RuntimeError('CUDA and NVML identify different devices')
             gpu = dict(physical_id=identity, telemetry=telemetry.stdout.strip(),
                        peak_used_mib=max(gpu.get('peak_used_mib',0),float(telemetry.stdout.strip().split(',')[-2])))
             if float(telemetry.stdout.strip().split(',')[-1]) > 0:last_use=time.time()
