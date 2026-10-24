@@ -45,11 +45,13 @@ strategy=fsdp2
 reward_args=("reward.custom_reward_function.path=$code/reward_function.py" reward.custom_reward_function.name=compute_score reward.num_workers=4)
 ray_cpu=ray_kwargs.ray_init.num_cpus=16
 dataset_args=()
+seed_arg=data.seed=42
 if [[ ${SCIENCE_RUNTIME:-} == verl05 ]]; then
   strategy=fsdp
   reward_args=("custom_reward_function.path=$code/reward_function.py" custom_reward_function.name=compute_score)
   ray_cpu=ray_init.num_cpus=16
   dataset_args=("data.custom_cls.path=$code/tools/science_dataset.py" data.custom_cls.name=NoThinkingDataset)
+  seed_arg=+data.seed=42
 fi
 python -m verl.trainer.main_ppo \
   algorithm.adv_estimator=grpo \
@@ -57,7 +59,7 @@ python -m verl.trainer.main_ppo \
   algorithm.use_kl_in_reward=false \
   data.train_files="$RUN_ROOT/data/train.parquet" \
   data.val_files="['$RUN_ROOT/data/scp_test_difficult_1.parquet','$RUN_ROOT/data/scibench_test.parquet','$RUN_ROOT/data/stem__gpqa_diamond_198.parquet']" \
-  data.train_batch_size=64 data.val_batch_size=128 data.seed=42 \
+  data.train_batch_size=64 data.val_batch_size=128 "$seed_arg" \
   data.max_prompt_length=2048 data.max_response_length=2048 \
   data.filter_overlong_prompts=true data.truncation=error \
   data.dataloader_num_workers=2 \
