@@ -296,6 +296,12 @@ def worker_loop(profile):
     child = None
     token = None
     seen = set()
+    prior_path=root/'supervisor/worker.json'
+    if prior_path.exists():
+        prior=json.loads(prior_path.read_text())
+        if prior.get('job_id') == job and prior.get('token'):
+            stop_token(prior['token'])
+            seen.add(prior['token'])  # CPU supervision owns checkpoint-safe recovery.
     last_gpu = 0
     gpu = {}
     sequence = 0
