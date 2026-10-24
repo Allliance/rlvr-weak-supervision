@@ -7,8 +7,33 @@ code=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)
 mkdir -p "$RUN_ROOT/checkpoints" "$RUN_ROOT/logs"
 export REWARD_MODEL_TYPE=RULE_BASED
 export WANDB_ENTITY=alliance WANDB_PROJECT=Noisy-RLVR
-export WANDB_RUN_ID=${WANDB_RUN_ID:-q3science2048s42_20261022}
+: "${WANDB_RUN_ID:?Set the allocated experiment's own W&B identity}"
+: "${EXPERIMENT_NAME:?Set the allocated experiment's name}"
+export WANDB_RUN_ID
 export WANDB_RESUME=allow WANDB_DIR="$RUN_ROOT"
+TOTAL_TRAINING_STEPS=${TOTAL_TRAINING_STEPS:-480}
+TOTAL_EPOCHS=${TOTAL_EPOCHS:-15}
+if [[ "$WANDB_RUN_ID" != q3science2048s42_20261022 ]]; then
+  # Only the historical full-clean identity may use its existing preparation.
+  # Every comparison arm binds its own data, tokenizer filter and checkpoint root.
+  TOTAL_EPOCHS=$(python - "$RUN_ROOT" "$WANDB_RUN_ID" <<'PY'
+import hashlib,json,sys
+from pathlib import Path
+root=Path(sys.argv[1]); audit=json.loads((root/'data/preparation.json').read_text())
+assert audit['tokenizer_filter_verified'], 'Exact tokenizer filter has not passed'
+assert hashlib.sha256((root/'data/train.parquet').read_bytes()).hexdigest()==audit['data_sha256']
+assert audit['total_epochs']*(audit['learner_rows']//64)>=480
+identity=root/'experiment-identity.json'
+expected={'wandb_id':sys.argv[2], 'data_sha256':audit['data_sha256']}
+if identity.exists():
+    assert json.loads(identity.read_text())==expected, 'Mismatched run/checkpoint identity'
+else:
+    assert not any((root/'checkpoints').iterdir()), 'Unidentified checkpoints cannot be resumed'
+    identity.write_text(json.dumps(expected)+'\n')
+print(audit['total_epochs'])
+PY
+)
+fi
 # Avoid importing the repository's older CUDA-only verl instead of the runtime.
 cd "$RUN_ROOT"
 export PYTHONPATH="${SCIENCE_DEPENDENCIES:-}"
@@ -72,9 +97,9 @@ python -m verl.trainer.main_ppo \
   reward.num_workers=4 \
   trainer.logger='[console,wandb]' \
   trainer.project_name=Noisy-RLVR \
-  trainer.experiment_name=Qwen3-1.7B-science-2048 \
+  trainer.experiment_name="$EXPERIMENT_NAME" \
   trainer.n_gpus_per_node=1 trainer.nnodes=1 \
-  trainer.total_epochs=15 trainer.total_training_steps=480 \
+  trainer.total_epochs="$TOTAL_EPOCHS" trainer.total_training_steps="$TOTAL_TRAINING_STEPS" \
   trainer.save_freq=5 trainer.test_freq=25 \
   trainer.max_actor_ckpt_to_keep=3 \
   trainer.default_local_dir="$RUN_ROOT/checkpoints" \

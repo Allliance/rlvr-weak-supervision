@@ -1,17 +1,26 @@
 # Experiments
 
-The live shared index is `origin/experiment-queue:experiments/README.md`. Main and task branches are snapshots. One controller owns this science run; all other experiment queues remain separate. Resources describe the validated hardware profile, not a measured minimum. No additional experiments are authorized.
+The live shared index is `origin/experiment-queue:experiments/README.md`. Main and task branches are snapshots. The existing Qwen full-clean claim remains owned by its original controller; new pending conditions are unassigned. All other project queues remain separate. Resources describe the validated hardware profile, not a measured minimum. On October 24 the user authorized the two four-condition science comparisons below. New W&B runs are created only after actual allocation and a successful shared claim; no duplicate full-clean Qwen run is authorized.
+
+Science groups: [Llama3.2-3B-Instruct](2026-10-24/group--llama3-2-3b-instruct-science-2048.md), [Qwen3-1.7B](2026-10-24/group--qwen3-1-7b-science-2048.md). Four conditions each; the existing Qwen full-clean run fills one slot. New noisy arms are the complementary pool with 100% incorrect labels, consistent with noisy-rlvr; they are not the mixed arm.
 
 ## Pending Experiments
 
 | Priority | Experiment | Resources | Host | Claim | Job | Started | Ended | W&B | Status |
 |---|---|---|---|---|---|---|---|---|---|
+| 11 | [Llama-3.2-3B-Instruct science · full clean](2026-10-24/llama3-2-3b-instruct-science-full-clean.md) | gpu=1; vram=unknown | — | — | — | — | — | — | Authorized Oct24; queued; model/runtime calibration pending |
+| 12 | [Llama-3.2-3B-Instruct science · 10% clean](2026-10-24/llama3-2-3b-instruct-science-clean10.md) | gpu=1; vram=unknown | — | — | — | — | — | — | Authorized Oct24; queued; model/runtime calibration pending |
+| 13 | [Llama-3.2-3B-Instruct science · 90% noisy pool](2026-10-24/llama3-2-3b-instruct-science-noisy90.md) | gpu=1; vram=unknown | — | — | — | — | — | — | Authorized Oct24; queued; model/runtime calibration pending; audited incorrect labels required |
+| 14 | [Llama-3.2-3B-Instruct science · 1% clean](2026-10-24/llama3-2-3b-instruct-science-clean1.md) | gpu=1; vram=unknown | — | — | — | — | — | — | Authorized Oct24; queued; model/runtime calibration pending |
+| 15 | [Qwen3-1.7B science · 10% clean](2026-10-24/qwen3-1-7b-science-clean10.md) | gpu=1; vram=unknown | — | — | — | — | — | — | Authorized Oct24; queued; model/runtime calibration pending |
+| 16 | [Qwen3-1.7B science · 90% noisy pool](2026-10-24/qwen3-1-7b-science-noisy90.md) | gpu=1; vram=unknown | — | — | — | — | — | — | Authorized Oct24; queued; model/runtime calibration pending; audited incorrect labels required |
+| 17 | [Qwen3-1.7B science · 1% clean](2026-10-24/qwen3-1-7b-science-clean1.md) | gpu=1; vram=unknown | — | — | — | — | — | — | Authorized Oct24; queued; model/runtime calibration pending |
 
 ## Running Experiments
 
 | Priority | Experiment | Resources | Host | Claim | Job | Started | Ended | W&B | Status |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | [Qwen3-1.7B science 2048](qwen3-science-2048.md) | gpu=1; vram=288GiB; cpu=16; ram=128GiB | aac16-ele-priv-ctl-2 | b658f544cc6b2f70:science2048-20261022 | 49923 | 2026-10-22T04:30:50+00:00 | — | [run](https://forge.coreweave.com/wandb/alliance/Noisy-RLVR/runs/q3science2048s42_20261022) | training; 11/480 updates; complete checkpoint 10; restore verified; finite metrics |
+| 1 | [Qwen3-1.7B science 2048](qwen3-science-2048.md) | gpu=1; vram=288GiB; cpu=16; ram=128GiB | aac16-ele-priv-ctl-2 | b658f544cc6b2f70:science2048-20261022 | 49923 | 2026-10-22T04:30:50+00:00 | — | [run](https://forge.coreweave.com/wandb/alliance/Noisy-RLVR/runs/q3science2048s42_20261022) | training; 462/480 updates |
 
 ## Finished Experiments
 

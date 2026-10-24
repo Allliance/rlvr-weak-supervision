@@ -3,8 +3,8 @@
 Use the research-maintenance, train-model and experiment-orchestration skills for
 research changes and training. Read the published consent record and live index
 on `origin/experiment-queue` before orchestration actions; task branches and main
-are snapshots. The authorized science protocol is
-`experiments/qwen3-science-2048.md`. Preserve its owner claim and do not launch a
+are snapshots. Authorized science protocols are
+`experiments/qwen3-science-2048.md` and the October 24 comparison groups linked in `experiments/README.md`. Preserve the existing full-clean Qwen owner claim and do not launch a
 duplicate or introduce additional experiments without user authorization.
 
 Keep host profiles, credentials, prepared data, logs, controller journals and
