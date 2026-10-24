@@ -13,7 +13,9 @@ export WANDB_RUN_ID
 export WANDB_RESUME=allow WANDB_DIR="$RUN_ROOT"
 TOTAL_TRAINING_STEPS=${TOTAL_TRAINING_STEPS:-480}
 TOTAL_EPOCHS=${TOTAL_EPOCHS:-15}
-if [[ "$WANDB_RUN_ID" != q3science2048s42_20261022 ]]; then
+config_only=false
+if [[ ${SCIENCE_CONFIG_ONLY:-0} == 1 && " $* " == *" --cfg job "* ]]; then config_only=true; fi
+if [[ "$WANDB_RUN_ID" != q3science2048s42_20261022 && "$config_only" != true ]]; then
   # Only the historical full-clean identity may use its existing preparation.
   # Every comparison arm binds its own data, tokenizer filter and checkpoint root.
   TOTAL_EPOCHS=$(python - "$RUN_ROOT" "$WANDB_RUN_ID" <<'PY'
@@ -41,21 +43,36 @@ resume=()
 if [[ -n "${RESUME_CHECKPOINT:-}" ]]; then
   resume=(trainer.resume_mode=resume_path "trainer.resume_from_path=$RESUME_CHECKPOINT")
 fi
+strategy=fsdp2
+reward_args=("reward.custom_reward_function.path=$code/reward_function.py" reward.custom_reward_function.name=compute_score reward.num_workers=4)
+ray_cpu=ray_kwargs.ray_init.num_cpus=16
+dataset_args=()
+seed_arg=data.seed=42
+rollout_seed=actor_rollout_ref.rollout.seed=42
+if [[ ${SCIENCE_RUNTIME:-} == verl05 ]]; then
+  strategy=fsdp
+  reward_args=("custom_reward_function.path=$code/reward_function.py" custom_reward_function.name=compute_score)
+  ray_cpu=ray_init.num_cpus=16
+  dataset_args=("data.custom_cls.path=$code/tools/science_dataset.py" data.custom_cls.name=NoThinkingDataset)
+  seed_arg=+data.seed=42
+  rollout_seed=+actor_rollout_ref.rollout.seed=42
+fi
 python -m verl.trainer.main_ppo \
   algorithm.adv_estimator=grpo \
   algorithm.norm_adv_by_std_in_grpo=true \
   algorithm.use_kl_in_reward=false \
   data.train_files="$RUN_ROOT/data/train.parquet" \
   data.val_files="['$RUN_ROOT/data/scp_test_difficult_1.parquet','$RUN_ROOT/data/scibench_test.parquet','$RUN_ROOT/data/stem__gpqa_diamond_198.parquet']" \
-  data.train_batch_size=64 data.val_batch_size=128 data.seed=42 \
+  data.train_batch_size=64 data.val_batch_size=128 "$seed_arg" \
   data.max_prompt_length=2048 data.max_response_length=2048 \
   data.filter_overlong_prompts=true data.truncation=error \
   data.dataloader_num_workers=2 \
   '+data.apply_chat_template_kwargs.enable_thinking=false' \
+  "${dataset_args[@]}" \
   actor_rollout_ref.model.path="$BASE_MODEL" \
   actor_rollout_ref.model.use_remove_padding=true \
   actor_rollout_ref.model.enable_gradient_checkpointing=true \
-  actor_rollout_ref.actor.strategy=fsdp2 \
+  actor_rollout_ref.actor.strategy="$strategy" \
   actor_rollout_ref.actor.optim.lr=1e-6 \
   actor_rollout_ref.actor.optim.lr_warmup_steps_ratio=0 \
   actor_rollout_ref.actor.optim.weight_decay=0.01 \
@@ -74,7 +91,7 @@ python -m verl.trainer.main_ppo \
   actor_rollout_ref.actor.use_torch_compile=false \
   actor_rollout_ref.actor.fsdp_config.param_offload=false \
   actor_rollout_ref.actor.fsdp_config.optimizer_offload=false \
-  actor_rollout_ref.ref.strategy=fsdp2 \
+  actor_rollout_ref.ref.strategy="$strategy" \
   actor_rollout_ref.ref.fsdp_config.param_offload=true \
   actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu=8 \
   actor_rollout_ref.rollout.name=vllm \
@@ -87,14 +104,12 @@ python -m verl.trainer.main_ppo \
   actor_rollout_ref.rollout.temperature=1 \
   actor_rollout_ref.rollout.top_p=1 \
   actor_rollout_ref.rollout.top_k=-1 \
-  actor_rollout_ref.rollout.seed=42 \
+  "$rollout_seed" \
   actor_rollout_ref.rollout.val_kwargs.do_sample=false \
   actor_rollout_ref.rollout.val_kwargs.n=1 \
   actor_rollout_ref.rollout.val_kwargs.temperature=0 \
   actor_rollout_ref.rollout.log_prob_micro_batch_size_per_gpu=8 \
-  reward.custom_reward_function.path="$code/reward_function.py" \
-  reward.custom_reward_function.name=compute_score \
-  reward.num_workers=4 \
+  "${reward_args[@]}" \
   trainer.logger='[console,wandb]' \
   trainer.project_name=Noisy-RLVR \
   trainer.experiment_name="$EXPERIMENT_NAME" \
@@ -106,4 +121,4 @@ python -m verl.trainer.main_ppo \
   trainer.resume_mode=auto trainer.default_hdfs_dir=null \
   trainer.rollout_data_dir="$RUN_ROOT/rollouts" \
   trainer.validation_data_dir="$RUN_ROOT/validation" \
-  ray_kwargs.ray_init.num_cpus=16 "${resume[@]}" "$@"
+  "$ray_cpu" "${resume[@]}" "$@"

@@ -4,7 +4,7 @@ Experiment group: Llama-3.2-3B-Instruct science comparison
 # Llama-3.2-3B-Instruct science comparison
 
 Agent ID: `codex:01a16e48-bd19-7990-9cba-1dbf720faa54:/root`
-Machine ID: editorial preparer; execution children unassigned
+Machine ID: `machine:sha256:500e99e365d73bad6111ad4fa944b2b54a9728178cee7d4d578a3f8bf2bec396`
 W&B: —
 
 ## Goal

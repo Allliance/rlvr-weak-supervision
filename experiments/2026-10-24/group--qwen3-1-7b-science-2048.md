@@ -4,8 +4,8 @@ Experiment group: Qwen3-1.7B science comparison
 # Qwen3-1.7B science comparison
 
 Agent ID: `codex:01a16e48-bd19-7990-9cba-1dbf720faa54:/root`
-Machine ID: editorial preparer; execution children unassigned
-W&B: [existing full clean](https://forge.coreweave.com/wandb/alliance/Noisy-RLVR/runs/q3science2048s42_20261022)
+Machine ID: `machine:sha256:500e99e365d73bad6111ad4fa944b2b54a9728178cee7d4d578a3f8bf2bec396`
+W&B: [existing full clean](https://forge.coreweave.com/wandb/alliance/Noisy-RLVR/runs/q3science2048s42_20261022) · [1% clean](https://wandb.ai/alliance/Noisy-RLVR/runs/q3scienceclean1s42_20261024) · [10% clean](https://wandb.ai/alliance/Noisy-RLVR/runs/q3scienceclean10s42_20261024)
 
 ## Goal
 
@@ -22,9 +22,9 @@ Start each new condition from `Qwen/Qwen3-1.7B`. Use the published qwen-math-1.5
 - [90% noisy pool](qwen3-1-7b-science-noisy90.md): The complementary 1,843 examples, all learner targets incorrect and nonempty; generated targets require independent incorrectness audit and must not expose correct references.
 - [1% clean](qwen3-1-7b-science-clean1.md): 20 clean examples nested within the identical clean10 subset.
 
-## Main Finding
+## Main Finding (Running)
 
-Queued; no result for the newly requested conditions. Reuse the existing Qwen full-clean run rather than duplicate it. No new W&B identity before allocation and a successful execution claim.
+The two new clean arms have allocated H100 GPUs and are in startup/recovery. The existing full-clean trajectory remains interrupted at its last verified remote upload, 467/480 updates, on its original controller. No completed science comparison is claimed. Noisy preparation is queued and must pass its audit before training.
 
 ## Events
 
