@@ -71,5 +71,18 @@ class SlurmControls(unittest.TestCase):
                 self.controller.ensure_manager()
             launch.assert_not_called()
 
+    def test_v1_and_v2_memory_limits_both_enforce_working_set(self):
+        for version in [1,2]:
+            base=self.root/str(version)
+            path=base/('memory/job' if version==1 else 'job');path.mkdir(parents=True)
+            (path/('memory.limit_in_bytes' if version==1 else 'memory.max')).write_text('4096')
+            (path/('memory.usage_in_bytes' if version==1 else 'memory.current')).write_text('3584')
+            prefix='total_' if version==1 else ''
+            (path/'memory.stat').write_text(prefix+'inactive_file 512\n'+prefix+'active_file 512\n')
+            result=science_slurm.working_memory('8:memory:/job\n' if version==1 else '0::/job\n',base)
+            self.assertEqual(result['cgroup_version'],version)
+            self.assertEqual(result['used_bytes'],2560)
+            self.assertEqual(result['fraction'],.625)
+
 
 if __name__=='__main__':unittest.main()

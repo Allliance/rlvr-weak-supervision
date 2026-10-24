@@ -28,6 +28,32 @@ def fields(job):
     return record
 
 
+def working_memory(text=None, mount=Path('/sys/fs/cgroup')):
+    text=Path('/proc/self/cgroup').read_text() if text is None else text
+    entries=[line.split(':',2) for line in text.splitlines()]
+    unified=next((row[2] for row in entries if row[0]=='0' and row[1]==''),None)
+    version=2 if unified is not None else 1
+    relative=unified if version==2 else next((row[2] for row in entries if 'memory' in row[1].split(',')),None)
+    if relative is None:raise RuntimeError('Memory cgroup is unavailable')
+    base=mount if version==2 else mount/'memory'
+    current=base/relative.lstrip('/');observations=[]
+    for path in [current,*current.parents]:
+        if path!=base and base not in path.parents:continue
+        try:
+            cap=(path/('memory.max' if version==2 else 'memory.limit_in_bytes')).read_text().strip()
+            if cap=='max' or int(cap)>=2**60:continue
+            usage=int((path/('memory.current' if version==2 else 'memory.usage_in_bytes')).read_text())
+            stats=dict(line.split() for line in (path/'memory.stat').read_text().splitlines())
+            cache=sum(int(stats.get(('total_' if version==1 else '')+key,stats.get(key,0)))
+                      for key in ('inactive_file','active_file'))
+            used=max(0,usage-cache)
+            observations.append(dict(limit_bytes=int(cap),used_bytes=used,fraction=used/int(cap),
+                                     cgroup_version=version,path=str(path)))
+        except (OSError,ValueError):continue
+    if not observations:raise RuntimeError('Finite native cgroup memory limit unavailable')
+    return min(observations,key=lambda item:item['limit_bytes'])
+
+
 class Native(Controller):
     def ensure_manager(self):
         error=self.root/'supervisor/manager-error.json'
@@ -425,20 +451,7 @@ print(json.dumps(dict(name=p.name,total_bytes=total,free_bytes=free,uuid=str(p.u
         stop = root / 'supervisor/stop.json'
         if stop.exists() and json.loads(stop.read_text()).get('token') == token:
             stopped = True
-        memory = {}
-        group = Path('/proc/self/cgroup').read_text().split('0::',1)[1].strip().lstrip('/')
-        cgroup = Path('/sys/fs/cgroup') / group
-        for candidate in [cgroup, *cgroup.parents]:
-            try:
-                cap = (candidate / 'memory.max').read_text().strip()
-                if cap != 'max':
-                    stats = dict(line.split() for line in (candidate/'memory.stat').read_text().splitlines())
-                    used = int((candidate/'memory.current').read_text()) - int(stats.get('inactive_file', 0))
-                    observation = dict(limit_bytes=int(cap), used_bytes=used, fraction=used/int(cap))
-                    if not memory or int(cap)<memory['limit_bytes']:memory=observation
-            except (OSError, ValueError):pass
-        if not memory:
-            raise RuntimeError('Finite native cgroup memory limit unavailable')
+        memory = working_memory()
         if memory['fraction'] >= .90:
             stopped = True
         if stopped and child is not None:
