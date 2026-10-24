@@ -50,6 +50,7 @@ class SlurmControls(unittest.TestCase):
 
     def test_no_checkpoint_cannot_resume_a_progressed_run(self):
         self.controller.queue=Mock(return_value=True)
+        self.controller.allocation=Mock(return_value=('RUNNING',3600))
         self.controller.s['completed_updates']=25
         with self.assertRaisesRegex(ValueError,'Complete recovery checkpoint'):
             self.controller.launch(recovery=True)

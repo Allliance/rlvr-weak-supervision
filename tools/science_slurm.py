@@ -70,14 +70,20 @@ class Native(Controller):
         health = self.health()
         if health.get('job_id') != self.p['job_id'] or health.get('token') != self.s.get('container_id'):
             return None
-        return 'running' if health.get('running') and time.time() - health.get('checked_epoch', 0) < 30 else None
+        sequence = health.get('sequence')
+        if sequence != self.s.get('worker_sequence'):
+            self.s.update(worker_sequence=sequence, worker_observed_epoch=time.time())
+            if self.s.get('container'):
+                save(self.root/'supervisor'/(self.s['container']+'-memory.json'),
+                     dict(health, checked_epoch=time.time()))
+        return 'running' if health.get('running') and time.time() - self.s.get('worker_observed_epoch', 0) < 180 else None
 
     def stop_container(self):
         token = self.s.get('container_id')
         if not token:
             return
         save(self.root / 'supervisor/stop.json', dict(token=token))
-        for _ in range(30):
+        for _ in range(60):
             h = self.health()
             if h.get('token') != token or not h.get('running'):
                 return
@@ -87,7 +93,7 @@ class Native(Controller):
         raise RuntimeError('Exact native workload stop is unverified')
 
     def launch(self, recovery=False):
-        if not self.queue() or (self.root / 'STOP').exists():
+        if self.allocation()[0] != 'RUNNING' or not self.queue() or (self.root / 'STOP').exists():
             return False
         step, checkpoint = self.checkpoints()
         if self.s['completed_updates'] and not step:
@@ -119,6 +125,17 @@ class Native(Controller):
             raise ValueError('Finite GPU lease budget exhausted')
         if not self.enabled() or (self.root / 'STOP').exists() or self.allocation()[0] != 'ABSENT':
             return
+        if self.p['job_id']:
+            history = run(['sacct','-nP','--allocations','--jobs='+str(self.p['job_id']),
+                           '--format=JobIDRaw,UID,State'])
+            rows = [line.split('|') for line in history.splitlines()
+                    if line.split('|')[0] == str(self.p['job_id'])]
+            if len(rows) != 1 or rows[0][1] != str(os.getuid()):
+                raise ValueError('Exact ended allocation is unverified')
+            if rows[0][2].startswith('CANCELLED'):
+                (self.root/'STOP').touch()
+                self.s.update(status='user_stopped',reason='Allocation cancelled; no automatic restart')
+                return
         token = self.p['claim'] + '-lease-' + str(self.s['renewals'] + 1)
         matches = [line.split('|')[0] for line in run(['squeue', '-h', '-u', str(os.getuid()), '-o', '%i|%k']).splitlines()
                    if line.endswith('|' + token)]
@@ -169,7 +186,7 @@ class Native(Controller):
             self.git('fetch', '--quiet', 'origin', 'refs/heads/experiment-queue')
             head = self.git('rev-parse', 'FETCH_HEAD')
             consent = self.git('show', head + ':.agents/experiment-orchestration.md')
-            if re.findall(r'^Status: (.+)$', consent, re.M) != ['enabled']:
+            if re.findall(r'^Status: (.+)$', consent, re.M) != ['enabled'] or not re.search(r'^Consent: \S', consent, re.M):
                 return False
             index = self.git('show', head + ':experiments/README.md') + '\n'
             marker = '](' + self.p['record'] + ')'
@@ -178,6 +195,8 @@ class Native(Controller):
                 raise ValueError('Expected one pending scientific protocol')
             cells = [v.strip() for v in matches[0].strip('|').split('|')]
             if cells[4] not in ('—', self.p['claim']):
+                fields(self.p['job_id'])  # Release only this verified losing candidate.
+                run(['scancel',str(self.p['job_id'])])
                 raise ValueError('Another allocated winner owns this condition')
             if self.allocation()[0] != 'RUNNING':
                 return False
@@ -187,8 +206,10 @@ class Native(Controller):
             index = index.replace(matches[0], replacement)
             # Put the allocated winner in Running before any W&B creation.
             index = index.replace(replacement + '\n', '')
-            index = re.sub(r'(## Running Experiments\n\n\|[^\n]*\n\|[^\n]*\n)',
+            index, inserted = re.subn(r'(## Running Experiments\n\n\|[^\n]*\n\|[^\n]*\n)',
                            lambda m: m[1] + replacement + '\n', index, count=1)
+            if inserted != 1:
+                raise ValueError('Running table shape is invalid; no queue edit published')
             self.git('read-tree', head)
             blob = self.git('hash-object', '-w', '--stdin', data=index)
             self.git('update-index', '--cacheinfo', '100644,' + blob + ',experiments/README.md')
@@ -217,7 +238,7 @@ class Native(Controller):
         head = self.git('rev-parse', 'FETCH_HEAD')
         index = self.git('show', head + ':experiments/README.md') + '\n'
         line = next(line for line in index.splitlines() if marker in line and line.startswith('|'))
-        if self.p['claim'] not in line or self.allocation()[0] != 'RUNNING':
+        if [v.strip() for v in line.strip('|').split('|')][4] != self.p['claim'] or self.allocation()[0] != 'RUNNING':
             raise ValueError('Allocated claim changed before protocol publication')
         child_path = 'experiments/' + self.p['record']
         child = self.git('show', head + ':' + child_path)
@@ -225,7 +246,8 @@ class Native(Controller):
             raise ValueError('Foreign scientific record')
         child = re.sub(r'^Machine ID: .+$', 'Machine ID: `' + machine + '`', child, flags=re.M)
         child = re.sub(r'^W&B: .+$', 'W&B: [run](' + self.p['run_url'] + ')', child, flags=re.M)
-        child = child.replace('Queued; no allocation or execution claim.', 'Allocated on ' + self.p['owner'] + '; optimizer startup pending.')
+        child = re.sub(r'## Main Finding\n.*?(?=\n## Events)',
+            '## Main Finding (Running)\n\nAllocated on '+self.p['owner']+'; optimizer startup pending. Native verl 0.5.0/CUDA execution is a runtime adaptation of the existing ROCm science protocol; compare with that version difference disclosed.\n', child, flags=re.S)
         self.git('read-tree', head)
         for path, data in [('experiments/README.md', index.replace(line, self.row())), (child_path, child)]:
             blob = self.git('hash-object', '-w', '--stdin', data=data)
@@ -244,7 +266,20 @@ class Native(Controller):
         super().tick()
 
 
-def worker(profile):
+def stop_token(token):
+    if not token:return
+    marker=('RLVR_WORKLOAD_TOKEN='+token).encode()
+    for sig in (signal.SIGTERM,signal.SIGKILL):
+        for proc in Path('/proc').iterdir():
+            if not proc.name.isdigit() or int(proc.name)==os.getpid():continue
+            try:
+                if proc.stat().st_uid==os.getuid() and marker in (proc/'environ').read_bytes().split(b'\0'):
+                    os.kill(int(proc.name),sig)
+            except OSError:pass
+        time.sleep(2)
+
+
+def worker_loop(profile):
     p = json.loads(Path(profile).read_text())
     root = Path(p['root'])
     job = int(os.environ['SLURM_JOB_ID'])
@@ -255,6 +290,8 @@ def worker(profile):
     seen = set()
     last_gpu = 0
     gpu = {}
+    sequence = 0
+    last_use = time.time()
     while True:
         request = root / 'supervisor/start.json'
         if request.exists():
@@ -272,6 +309,7 @@ def worker(profile):
                 log = (root / 'logs' / (action['name'] + '.log')).open('a')
                 child = subprocess.Popen(p['command'], env=env, cwd=str(root), stdout=log,
                                          stderr=subprocess.STDOUT, start_new_session=True)
+                save(root/'supervisor/worker.json',dict(job_id=job,token=token,running=True,checked_epoch=time.time()))
         stopped = (root / 'STOP').exists()
         stop = root / 'supervisor/stop.json'
         if stop.exists() and json.loads(stop.read_text()).get('token') == token:
@@ -293,16 +331,9 @@ def worker(profile):
         if memory['fraction'] >= .90:
             stopped = True
         if stopped and child is not None:
-            marker = ('RLVR_WORKLOAD_TOKEN=' + token).encode()
-            for sig in (signal.SIGTERM, signal.SIGKILL):
-                for proc in Path('/proc').iterdir():
-                    if not proc.name.isdigit() or int(proc.name)==os.getpid():continue
-                    try:
-                        if proc.stat().st_uid==os.getuid() and marker in (proc/'environ').read_bytes().split(b'\0'):
-                            os.kill(int(proc.name),sig)
-                    except OSError:pass
-                try:child.wait(timeout=10)
-                except subprocess.TimeoutExpired:pass
+            stop_token(token)
+            try:child.wait(timeout=20)
+            except subprocess.TimeoutExpired:pass
             if child.poll() is None:raise RuntimeError('Exact workload termination failed')
         if time.time() - last_gpu >= 60:
             identity = os.environ.get('SLURM_JOB_GPUS', '')
@@ -311,14 +342,30 @@ def worker(profile):
                 '--query-gpu=uuid,name,memory.total,memory.used,utilization.gpu', '--format=csv,noheader,nounits'],
                 capture_output=True,text=True,timeout=15,check=True)
             gpu = dict(physical_id=identity, telemetry=telemetry.stdout.strip())
+            if float(telemetry.stdout.strip().split(',')[-1]) > 0:last_use=time.time()
             last_gpu=time.time()
+        if time.time()-last_use >= 3300:
+            save(root/'supervisor'/f'idle-release-{job}.json',dict(checked_utc=utc(),idle_seconds=time.time()-last_use))
+            fields(job)
+            run(['scancel',str(job)])
+            return
+        sequence += 1
         health = dict(job_id=job, token=token, running=child is not None and child.poll() is None,
                       child_pid=child.pid if child else None, returncode=child.poll() if child else None,
-                      checked_epoch=time.time(), checked_utc=utc(), memory=memory, gpu=gpu)
+                      checked_epoch=time.time(), checked_utc=utc(), memory=memory, gpu=gpu, sequence=sequence)
         save(root/'supervisor/worker.json', health)
-        if token:
-            save(root/'supervisor'/ (action['name']+'-memory.json'), health)
         time.sleep(2)
+
+
+def worker(profile):
+    p=json.loads(Path(profile).read_text())
+    try:
+        worker_loop(profile)
+    finally:
+        path=Path(p['root'])/'supervisor/worker.json'
+        if path.exists():
+            health=json.loads(path.read_text())
+            if health.get('job_id') == int(os.environ['SLURM_JOB_ID']):stop_token(health.get('token'))
 
 
 def main():
