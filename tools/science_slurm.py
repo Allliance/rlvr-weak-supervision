@@ -29,6 +29,31 @@ def fields(job):
 
 
 class Native(Controller):
+    def publish_pending(self):
+        for _ in range(5):
+            self.git('fetch','--quiet','origin','refs/heads/experiment-queue')
+            head=self.git('rev-parse','FETCH_HEAD')
+            consent=self.git('show',head+':.agents/experiment-orchestration.md')
+            if re.findall(r'^Status: (.+)$',consent,re.M)!=['enabled'] or not re.search(r'^Consent: \S',consent,re.M):return
+            index=self.git('show',head+':experiments/README.md')+'\n'
+            marker=']('+self.p['record']+')'
+            rows=[line for line in index.splitlines() if line.startswith('|') and marker in line]
+            if len(rows)!=1:raise ValueError('Pending protocol is missing or duplicated')
+            cells=[value.strip() for value in rows[0].strip('|').split('|')]
+            if cells[4]!='—':return
+            cells[2]=self.p['resources']
+            cells[9]='Candidate '+self.p['claim'].split(':')[0]+'/'+str(self.p['job_id'])+' submitted; awaiting allocation and calibrated startup'
+            replacement='| '+' | '.join(cells)+' |'
+            if replacement==rows[0]:return
+            self.git('read-tree',head)
+            blob=self.git('hash-object','-w','--stdin',data=index.replace(rows[0],replacement))
+            self.git('update-index','--cacheinfo','100644,'+blob+',experiments/README.md')
+            tree=self.git('write-tree')
+            commit=self.git('commit-tree',tree,'-p',head,data='Publish pending science candidate\n')
+            try:self.git('push','--quiet','origin',commit+':refs/heads/experiment-queue');return
+            except RuntimeError:continue
+        raise RuntimeError('Pending candidate publication failed')
+
     def enabled(self):
         self.git('fetch', '--quiet', 'origin', 'refs/heads/experiment-queue')
         text = self.git('show', 'FETCH_HEAD:.agents/experiment-orchestration.md')
@@ -162,6 +187,7 @@ class Native(Controller):
         self.s.pop('container', None)
         self.s.pop('container_id', None)
         self.s['status'] = 'pending_allocation'
+        self.publish_pending()
 
     def row(self):
         values = [str(self.p.get('priority', 10)), '[' + self.p['name'] + '](' + self.p['record'] + ')',
@@ -184,6 +210,7 @@ class Native(Controller):
             self.persist()
             return False
         if state != 'RUNNING':
+            if state == 'PENDING':self.publish_pending()
             return False
         for _ in range(5):
             self.git('fetch', '--quiet', 'origin', 'refs/heads/experiment-queue')
@@ -293,6 +320,17 @@ def worker_loop(profile):
     job = int(os.environ['SLURM_JOB_ID'])
     if fields(job)['JobState'] != 'RUNNING':
         raise RuntimeError('Worker allocation is unavailable')
+    probe='''import json,torch,uuid
+assert torch.cuda.device_count()==1
+p=torch.cuda.get_device_properties(0);free,total=torch.cuda.mem_get_info()
+assert total>=79_000_000_000 and free>=total*.90
+x=torch.ones((1024,1024),device='cuda',dtype=torch.bfloat16)
+assert torch.isfinite(x@x).all();torch.cuda.synchronize()
+print(json.dumps(dict(name=p.name,total_bytes=total,free_bytes=free,uuid=str(p.uuid),logical_device=0,torch=torch.__version__,cuda=torch.version.cuda)))
+'''
+    proof=subprocess.run([p['python'],'-c',probe],capture_output=True,text=True,
+                         timeout=300,check=True,env=dict(os.environ,**p['env']))
+    save(root/'supervisor/gpu-preflight.json',json.loads(proof.stdout.strip().splitlines()[-1]))
     child = None
     token = None
     seen = set()
@@ -356,10 +394,13 @@ def worker_loop(profile):
         if time.time() - last_gpu >= 60:
             identity = os.environ.get('SLURM_JOB_GPUS', '')
             if not identity or ',' in identity:raise RuntimeError('Expected one scheduler-assigned physical GPU')
-            telemetry = subprocess.run(['nvidia-smi', '--id=' + identity,
+            telemetry = subprocess.run(['nvidia-smi',
                 '--query-gpu=uuid,name,memory.total,memory.used,utilization.gpu', '--format=csv,noheader,nounits'],
                 capture_output=True,text=True,timeout=15,check=True)
-            gpu = dict(physical_id=identity, telemetry=telemetry.stdout.strip())
+            if len(telemetry.stdout.strip().splitlines()) != 1:
+                raise RuntimeError('NVML exposure does not match the one-GPU allocation')
+            gpu = dict(physical_id=identity, telemetry=telemetry.stdout.strip(),
+                       peak_used_mib=max(gpu.get('peak_used_mib',0),float(telemetry.stdout.strip().split(',')[-2])))
             if float(telemetry.stdout.strip().split(',')[-1]) > 0:last_use=time.time()
             last_gpu=time.time()
         if time.time()-last_use >= 3300:
