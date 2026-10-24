@@ -13,7 +13,7 @@ Compare clean-data scarcity and incorrect supervision on science at matched trai
 
 ## Experimental Setup
 
-Model: `Qwen/Qwen3-1.7B` from original released weights. Use the paper's model-family-selected `data/science/train/qwen-math-1.5b/scp_2048.parquet` as the 2,048-row parent pool. The complementary 1,843 examples, all learner targets incorrect and nonempty; generated targets require independent incorrectness audit and must not expose correct references. Preserve deterministic membership across clusters. These are four supervision conditions, not four random seeds.
+Model: `Qwen/Qwen3-1.7B` from original released weights. Use the paper's model-family-selected `data/science/train/qwen-math-1.5b/scp_2048.parquet` as the 2,048-row parent pool. The complementary 1,843 examples, all learner targets incorrect and nonempty; generated targets require independent incorrectness audit and must not expose correct references. Preserve deterministic membership across clusters. Generate fixed targets with original `Qwen/Qwen3-1.7B` revision `70d244cc86ccca08cf5af4e1e306ecf908b1ad5e`, thinking disabled, seed 43. Take the first boxed candidate rejected against both raw and unescaped correct references and accepted against itself by the training Math-Verify scorer. At most 32 samples per question; later rounds ask for an incorrect alternative without revealing the reference. Preserve generated labels across restarts. The teacher is fixed across the two science groups; this is a newly specified science noise mechanism, not the historical math target corpus. These are four supervision conditions, not four random seeds.
 
 Inherit the existing [Qwen science protocol](../qwen3-science-2048.md): GRPO, 480 optimizer updates, 64 prompts × 8 responses, AdamW LR 1e-6, KL loss 0.001, BF16, seed 42, prompt/response caps 2,048/2,048. Thinking disabled explicitly where supported. Clean1 is replicated equally four times to 80 learner rows so batch 64 remains valid; train 480 epochs before tokenizer filtering. Each update contains repeated prompts, so it does not contain 64 unique questions. Clean10 uses 160 epochs and noisy90 18 epochs with the hard 480-update cap. Recompute all epoch counts after tokenizer filtering to guarantee 480 updates. Full clean uses 15 epochs. Total exposure is matched by updates, not epochs.
 
@@ -21,7 +21,7 @@ Evaluate SCP difficult-50, SciBench and GPQA before training and every 25 update
 
 ## Main Finding
 
-Queued; no allocation or execution claim. Waiting for approved cluster budget and model/runtime preflight. Noisy conditions additionally require generated, verified incorrect targets. Existing full-clean Qwen results are not evidence for these new conditions.
+Queued; no allocation or execution claim. Waiting for approved cluster budget and model/runtime preflight. The allocated noisy pipeline generates and audits targets before any optimizer update; an incomplete audit blocks training. Existing full-clean Qwen results are not evidence for these new conditions.
 
 ## Events
 

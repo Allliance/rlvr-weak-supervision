@@ -28,11 +28,11 @@ def scores(target, reference):
     code='''import importlib.util,json,sys
 spec=importlib.util.spec_from_file_location('scorer',sys.argv[1])
 m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
-target,reference=json.load(sys.stdin)
+target,reference,normalized_reference=json.load(sys.stdin)
 boxed='\\\\boxed{'+target+'}'
-print(json.dumps([m.compute_score(boxed,reference),m.compute_score(boxed,target)]))
+print(json.dumps([m.compute_score(boxed,reference),m.compute_score(boxed,target),m.compute_score(boxed,normalized_reference)]))
 '''
-    result=subprocess.run([sys.executable,'-c',code,str(scorer)],input=json.dumps([target,reference]),
+    result=subprocess.run([sys.executable,'-c',code,str(scorer)],input=json.dumps([target,reference,reference.replace('\\\\','\\')]),
         capture_output=True,text=True,check=True,timeout=12)
     return json.loads(result.stdout.strip().splitlines()[-1])
 
@@ -96,11 +96,11 @@ def main():
                     for candidate in result.outputs:
                         target=boxed_answer(candidate.text)
                         if not target or target.strip()==reference.strip():continue
-                        try:wrong,self_score=scores(target,reference)
+                        try:wrong,self_score,normalized_wrong=scores(target,reference)
                         except (subprocess.TimeoutExpired,subprocess.CalledProcessError,ValueError):continue
-                        if wrong!=0 or self_score!=1:continue
+                        if wrong!=0 or normalized_wrong!=0 or self_score!=1:continue
                         item=dict(source_row=index,target=target,verified_incorrect=True,
-                            verifier='training Math-Verify rejects target against reference and accepts target against itself',
+                            verifier='training Math-Verify rejects target against raw and unescaped reference and accepts target against itself',
                             prompt_sha256=hashlib.sha256(json.dumps(rows[index]['prompt'],sort_keys=True).encode()).hexdigest(),
                             reference_sha256=hashlib.sha256(reference.encode()).hexdigest(),
                             teacher_round=round_number,teacher_output_sha256=hashlib.sha256(candidate.text.encode()).hexdigest())
