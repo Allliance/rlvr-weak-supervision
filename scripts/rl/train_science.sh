@@ -41,6 +41,12 @@ resume=()
 if [[ -n "${RESUME_CHECKPOINT:-}" ]]; then
   resume=(trainer.resume_mode=resume_path "trainer.resume_from_path=$RESUME_CHECKPOINT")
 fi
+strategy=fsdp2
+reward_args=("reward.custom_reward_function.path=$code/reward_function.py" reward.custom_reward_function.name=compute_score reward.num_workers=4)
+if [[ ${SCIENCE_RUNTIME:-} == verl05 ]]; then
+  strategy=fsdp
+  reward_args=("custom_reward_function.path=$code/reward_function.py" custom_reward_function.name=compute_score)
+fi
 python -m verl.trainer.main_ppo \
   algorithm.adv_estimator=grpo \
   algorithm.norm_adv_by_std_in_grpo=true \
@@ -55,7 +61,7 @@ python -m verl.trainer.main_ppo \
   actor_rollout_ref.model.path="$BASE_MODEL" \
   actor_rollout_ref.model.use_remove_padding=true \
   actor_rollout_ref.model.enable_gradient_checkpointing=true \
-  actor_rollout_ref.actor.strategy=fsdp2 \
+  actor_rollout_ref.actor.strategy="$strategy" \
   actor_rollout_ref.actor.optim.lr=1e-6 \
   actor_rollout_ref.actor.optim.lr_warmup_steps_ratio=0 \
   actor_rollout_ref.actor.optim.weight_decay=0.01 \
@@ -74,7 +80,7 @@ python -m verl.trainer.main_ppo \
   actor_rollout_ref.actor.use_torch_compile=false \
   actor_rollout_ref.actor.fsdp_config.param_offload=false \
   actor_rollout_ref.actor.fsdp_config.optimizer_offload=false \
-  actor_rollout_ref.ref.strategy=fsdp2 \
+  actor_rollout_ref.ref.strategy="$strategy" \
   actor_rollout_ref.ref.fsdp_config.param_offload=true \
   actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu=8 \
   actor_rollout_ref.rollout.name=vllm \
@@ -92,9 +98,7 @@ python -m verl.trainer.main_ppo \
   actor_rollout_ref.rollout.val_kwargs.n=1 \
   actor_rollout_ref.rollout.val_kwargs.temperature=0 \
   actor_rollout_ref.rollout.log_prob_micro_batch_size_per_gpu=8 \
-  reward.custom_reward_function.path="$code/reward_function.py" \
-  reward.custom_reward_function.name=compute_score \
-  reward.num_workers=4 \
+  "${reward_args[@]}" \
   trainer.logger='[console,wandb]' \
   trainer.project_name=Noisy-RLVR \
   trainer.experiment_name="$EXPERIMENT_NAME" \
