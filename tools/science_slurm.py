@@ -56,6 +56,23 @@ def working_memory(text=None, mount=Path('/sys/fs/cgroup')):
 
 
 class Native(Controller):
+    def remaining_gpu_seconds(self):
+        if 'gpu_hour_cap' not in self.p:
+            return None
+        jobs=set(self.s.get('native_allocations',[]))
+        if self.p['job_id']:jobs.add(int(self.p['job_id']))
+        used=0
+        for job in jobs:
+            rows=[line.split('|') for line in run(['sacct','-nP','--allocations','--jobs='+str(job),
+                '--format=JobIDRaw,UID,ElapsedRaw,State']).splitlines() if line.split('|')[0]==str(job)]
+            if len(rows)!=1 or rows[0][1]!=str(os.getuid()):
+                raise ValueError('Owned allocation accounting is unavailable')
+            if rows[0][3].split()[0] not in ['COMPLETED','CANCELLED','FAILED','TIMEOUT','OUT_OF_MEMORY','NODE_FAIL','PREEMPTED','BOOT_FAIL','DEADLINE']:
+                raise ValueError('Previous GPU allocation is not confirmed terminal')
+            used+=int(rows[0][2])
+        self.s.update(native_allocations=sorted(jobs),allocated_gpu_seconds=used)
+        return int(self.p['gpu_hour_cap']*3600)-used
+
     def ensure_manager(self):
         error=self.root/'supervisor/manager-error.json'
         if error.exists() and json.loads(error.read_text()).get('job_id')==self.p['job_id']:
@@ -237,13 +254,25 @@ print(json.dumps(found))
         if matches:
             job = matches[0]
         else:
+            arguments=list(self.p['sbatch_args'])
+            remaining=self.remaining_gpu_seconds()
+            if remaining is not None:
+                if remaining<=180:raise ValueError('Allocated GPU-hour budget exhausted')
+                duration=next(a.split('=',1)[1] for a in arguments if a.startswith('--time='))
+                day,clock=duration.split('-',1) if '-' in duration else ('0',duration)
+                parts=[int(x) for x in clock.split(':')]
+                requested=int(day)*86400+(sum(v*60**(len(parts)-i-1) for i,v in enumerate(parts)) if len(parts)>1 else parts[0]*60)
+                arguments=[a for a in arguments if not a.startswith('--time=')]
+                arguments.append('--time='+str(min(requested,remaining)//60))
             self.s['pending_submission'] = token
             self.persist()
-            job = run(['sbatch', '--parsable', '--comment=' + token, *self.p['sbatch_args'],
+            job = run(['sbatch', '--parsable', '--comment=' + token, *arguments,
                        self.p['holder'], self.p['profile']]).split(';')[0]
         if not job.isdigit():
             raise ValueError('Uncertain allocation response')
         self.p['job_id'] = int(job)
+        if 'gpu_hour_cap' in self.p:
+            self.s['native_allocations']=sorted(set(self.s.get('native_allocations',[]))|{int(job)})
         save(self.p['profile'], self.p)
         self.s['renewals'] += 1
         self.s.pop('manager_starts', None)  # Recovery bounds apply to this allocation.
