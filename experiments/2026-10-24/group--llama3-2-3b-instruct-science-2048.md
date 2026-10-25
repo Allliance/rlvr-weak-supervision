@@ -28,7 +28,7 @@ Literature basis: [Section 2 and Appendix B.2 of the paper](https://arxiv.org/ht
 
 ## Main Finding
 
-Snapshot 2026-10-25T03:12:24+00:00: All four Bouchet candidates remain pending Slurm Priority: full clean30601546, clean1030601547, clean130601548 and noisy9030609819. Exact CPU controller and watchdog processes are live and current. Their pending requests were extended in place to 24 hours while retaining the original 48 allocated GPU-hour ceiling per condition; the supervisor now sums actual owned Slurm elapsed time before renewals. Shared code revision21aeb6b is deployed on both clusters. GPU calibration and optimizer startup remain unverified until allocation; no new W&B record is created while unassigned.
+Snapshot 2026-10-25T03:12:24+00:00: All four Bouchet candidates remain pending Slurm Priority: full clean (30601546), clean10 (30601547), clean1 (30601548) and noisy90 (30609819). Exact CPU controller and watchdog processes are live and current. Their pending requests were extended in place to 24 hours while retaining the original 48 allocated GPU-hour ceiling per condition; the supervisor now sums actual owned Slurm elapsed time before renewals. Shared code revision 21aeb6b is deployed on both clusters. GPU calibration and optimizer startup remain unverified until allocation; no new W&B record is created while unassigned.
 
 ## Events
 
