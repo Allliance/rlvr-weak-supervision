@@ -21,7 +21,7 @@ Evaluate SCP difficult-50, SciBench and GPQA before training and every 25 update
 
 ## Main Finding (Running)
 
-Startup verified: at least 8/480 finite optimizer updates with LR 1e-6, uploaded optimizer metrics in W&B, and complete checkpoint 5 validated on CPU. All 311 model tensors and 29 Adam states are finite; scheduler step, all RNG families and dataloader state are present. No completed comparison result is claimed. Native verl 0.5/CUDA is the documented adaptation of the legacy ROCm science protocol; retain that framework difference when comparing results.
+Startup verified: at least 401/480 finite optimizer updates with LR 1e-6, uploaded optimizer metrics in W&B, and complete checkpoint 5 validated on CPU. All 311 model tensors and 29 Adam states are finite; scheduler step, all RNG families and dataloader state are present. No completed comparison result is claimed. Native verl 0.5/CUDA is the documented adaptation of the legacy ROCm science protocol; retain that framework difference when comparing results.
 
 ## Events
 

@@ -5,7 +5,7 @@ Experiment group: [Qwen3-1.7B science comparison](group--qwen3-1-7b-science-2048
 
 Agent ID: `codex:01a16e48-bd19-7990-9cba-1dbf720faa54:/root`
 Machine ID: `machine:sha256:54d325dcb906a630c9c82e39451b3688533305d1a7a627d37f4c72734a0f290b`
-W&B: [run](https://wandb.ai/alliance/Noisy-RLVR/runs/q3sciencenoisy90s42_20261024)
+W&B: — (unused preparation record deleted at user request)
 
 ## Goal
 
@@ -19,9 +19,9 @@ Inherit the existing [Qwen science protocol](../qwen3-science-2048.md): GRPO, 48
 
 Evaluate SCP difficult-50, SciBench and GPQA before training and every 25 updates; save full state every five updates and at the endpoint. Re-audit tokenizer filtering and exact question overlap per arm; report SCP both with and without overlapping questions. The existing Qwen SCP evaluation overlaps training and must remain labeled a contaminated diagnostic. Publish source revision, exact data/model hashes and execution calibration to W&B only after an allocated claim wins. No new run is created while unassigned. First-observed request time is approximate; exact message timestamp was unavailable.
 
-## Main Finding (Running)
+## Main Finding
 
-Preparation active: 281/1843 source-bound incorrect targets have passed the verifier; learner updates remain 0/480. The complete fixed-label audit must pass before training. No completed comparison result is claimed. Native verl 0.5/CUDA is the documented adaptation of the legacy ROCm science protocol; retain that framework difference when comparing results.
+Preparation failed after exhausting the documented 32-candidate-per-question budget: 1828/1843 targets passed per-label checks; learner updates remain 0/480. The unused W&B entry was deleted at the user's request. The cache is preserved; this condition is blocked until the remaining labels pass the full audit. No completed comparison result is claimed. Native verl 0.5/CUDA is the documented adaptation of the legacy ROCm science protocol; retain that framework difference when comparing results.
 
 ## Events
 
