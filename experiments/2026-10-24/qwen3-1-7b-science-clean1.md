@@ -19,9 +19,9 @@ Inherit the existing [Qwen science protocol](../qwen3-science-2048.md): GRPO, 48
 
 Evaluate SCP difficult-50, SciBench and GPQA before training and every 25 updates; save full state every five updates and at the endpoint. Re-audit tokenizer filtering and exact question overlap per arm; report SCP both with and without overlapping questions. The existing Qwen SCP evaluation overlaps training and must remain labeled a contaminated diagnostic. Publish source revision, exact data/model hashes and execution calibration to W&B only after an allocated claim wins. No new run is created while unassigned. First-observed request time is approximate; exact message timestamp was unavailable.
 
-## Main Finding (Running)
+## Main Finding (Completed)
 
-Startup verified: at least 240/480 finite optimizer updates with LR 1e-6, uploaded optimizer metrics in W&B, and complete checkpoint 5 validated on CPU. All 311 model tensors and 29 Adam states are finite; scheduler step, all RNG families and dataloader state are present. No completed comparison result is claimed. Native verl 0.5/CUDA is the documented adaptation of the legacy ROCm science protocol; retain that framework difference when comparing results.
+Completed 480/480 updates. Final checkpoint480 passed full CPU validation: 311 model tensors and 29 initialized Adam states are finite; scheduler480, all RNG families and dataloader state are present. W&B initially stopped uploading at478; actual optimizer metrics479/480 were recovered from the original trainer log, with source hash retained locally, and the original run was finished successfully. Remote W&B now confirms Finished at480. Final GPQA accuracy: 0.294416; SciBench mean@1: 0.199128. The SciBench mean@2 subgroup must not be used as the full score. SCP contains known training overlap. The four-condition comparison remains incomplete. Native verl0.5/CUDA differs from the legacy full-clean ROCm runtime.
 
 ## Events
 
