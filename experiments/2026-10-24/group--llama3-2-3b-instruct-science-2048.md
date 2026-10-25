@@ -15,6 +15,10 @@ Compare full-clean, 10%-clean, the fully incorrect complementary 90% pool, and n
 
 Start each new condition from `meta-llama/Llama-3.2-3B-Instruct`. Use the published llama-3b 2,048-example science pool. Match 480 GRPO updates, 64 prompts × 8 responses, seed 42 and the established science evaluation protocol. Dataset preparation retains nested membership, strips reference-bearing metadata from learner rows (RULE_BASED scoring ignores this metadata) and refuses noisy output without a bound audit. Runtime/GPU calibration and overlap audits are condition-specific prerequisites. Keep machine profiles and all generated data outside Git.
 
+Data consistency clarification (user instruction, 2026-10-25T00:47:12+00:00): Different published parent pools between Qwen and Llama are accepted for this within-model comparison. Keep each model's 2,048-question parent pool and each condition's membership fixed across runs and resumes: clean1 is nested within clean10, and noisy90 is the fixed complement of clean10. Do not independently resample questions for another condition or retry.
+
+Literature basis: [Section 2 and Appendix B.2 of the paper](https://arxiv.org/html/2604.18574v1) explicitly use model-aware solve@16 filtering and difficulty-stratified selection. The [authors' training script](https://github.com/pavelslab-nyu/rlvr-weak-supervision/blob/main/scripts/rl/train.sh#L33-L37) selects different Qwen and Llama science files. Reusing the released Qwen2.5-Math-selected pool for Qwen3 is our extension; it is not a fresh Qwen3-specific difficulty selection. Our additional 1%/10% conditions use the documented fixed seed-42 nested split of the released 2k parent.
+
 ## Sub-experiments
 
 - [full clean](llama3-2-3b-instruct-science-full-clean.md): All 2,048 original science examples and correct references.

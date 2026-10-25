@@ -25,4 +25,4 @@ Science groups: [Llama3.2-3B-Instruct](2026-10-24/group--llama3-2-3b-instruct-sc
 
 | Priority | Experiment | Resources | Host | Claim | Job | Started | Ended | W&B | Status |
 |---|---|---|---|---|---|---|---|---|---|
-| 10 | [Qwen3-1.7B-science-noisy90](2026-10-24/qwen3-1-7b-science-noisy90.md) | gpu=1; vram=80GiB; cpu=16; ram=128GiB | Misha/r817u15n02 | 54d325dcb906a630:3fa71d2bc1494d9a88ca7cdfcb1bf8cd | 3066735 | 2026-10-24T16:27:27+00:00 | 2026-10-24T18:55:58+00:00 | [run](https://wandb.ai/alliance/Noisy-RLVR/runs/q3sciencenoisy90s42_20261024) | needs_attention; preparing 1828/1843 verified noisy labels; 0/480 updates |
+| 10 | [Qwen3-1.7B-science-noisy90](2026-10-24/qwen3-1-7b-science-noisy90.md) | gpu=1; vram=80GiB; cpu=16; ram=128GiB | Misha/r817u15n02 | 54d325dcb906a630:3fa71d2bc1494d9a88ca7cdfcb1bf8cd | 3066735 | 2026-10-24T16:27:27+00:00 | 2026-10-24T18:55:58+00:00 | — | needs_attention; preparing 1828/1843 verified noisy labels; 0/480 updates; unused W&B preparation record deleted at user request |

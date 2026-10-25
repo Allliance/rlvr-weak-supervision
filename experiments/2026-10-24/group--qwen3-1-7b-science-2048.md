@@ -5,7 +5,7 @@ Experiment group: Qwen3-1.7B science comparison
 
 Agent ID: `codex:01a16e48-bd19-7990-9cba-1dbf720faa54:/root`
 Machine ID: `machine:sha256:500e99e365d73bad6111ad4fa944b2b54a9728178cee7d4d578a3f8bf2bec396`
-W&B: [existing full clean](https://forge.coreweave.com/wandb/alliance/Noisy-RLVR/runs/q3science2048s42_20261022) · [1% clean](https://wandb.ai/alliance/Noisy-RLVR/runs/q3scienceclean1s42_20261024) · [10% clean](https://wandb.ai/alliance/Noisy-RLVR/runs/q3scienceclean10s42_20261024) · [90% noisy](https://wandb.ai/alliance/Noisy-RLVR/runs/q3sciencenoisy90s42_20261024)
+W&B: [existing full clean](https://forge.coreweave.com/wandb/alliance/Noisy-RLVR/runs/q3science2048s42_20261022) · [1% clean](https://wandb.ai/alliance/Noisy-RLVR/runs/q3scienceclean1s42_20261024) · [10% clean](https://wandb.ai/alliance/Noisy-RLVR/runs/q3scienceclean10s42_20261024)
 
 ## Goal
 
@@ -14,6 +14,10 @@ Compare full-clean, 10%-clean, the fully incorrect complementary 90% pool, and n
 ## Experimental Setup
 
 Start each new condition from `Qwen/Qwen3-1.7B`. Use the published qwen-math-1.5b 2,048-example science pool. Match 480 GRPO updates, 64 prompts × 8 responses, seed 42 and the established science evaluation protocol. Dataset preparation retains nested membership, strips reference-bearing metadata from learner rows (RULE_BASED scoring ignores this metadata) and refuses noisy output without a bound audit. Runtime/GPU calibration and overlap audits are condition-specific prerequisites. Keep machine profiles and all generated data outside Git.
+
+Data consistency clarification (user instruction, 2026-10-25T00:47:12+00:00): Different published parent pools between Qwen and Llama are accepted for this within-model comparison. Keep each model's 2,048-question parent pool and each condition's membership fixed across runs and resumes: clean1 is nested within clean10, and noisy90 is the fixed complement of clean10. Do not independently resample questions for another condition or retry.
+
+Literature basis: [Section 2 and Appendix B.2 of the paper](https://arxiv.org/html/2604.18574v1) explicitly use model-aware solve@16 filtering and difficulty-stratified selection. The [authors' training script](https://github.com/pavelslab-nyu/rlvr-weak-supervision/blob/main/scripts/rl/train.sh#L33-L37) selects different Qwen and Llama science files. Reusing the released Qwen2.5-Math-selected pool for Qwen3 is our extension; it is not a fresh Qwen3-specific difficulty selection. Our additional 1%/10% conditions use the documented fixed seed-42 nested split of the released 2k parent.
 
 ## Sub-experiments
 
@@ -24,7 +28,7 @@ Start each new condition from `Qwen/Qwen3-1.7B`. Use the published qwen-math-1.5
 
 ## Main Finding (Running)
 
-All three new conditions have allocated GPUs on Misha: clean1 uses an A100 80GB, clean10 an H100 80GB, and noisy90 an H200. Both clean arms are training with finite metrics and W&B uploads. Clean10 has passed full CPU validation of checkpoint 5 (311 finite model tensors, 29 Adam states, scheduler/RNG/dataloader state); clean1 is progressing toward its first save, with an independent checkpoint auditor active in the retained CPU supervision allocation. Noisy90 is generating a fixed audited label set before training. Isolated Math-Verify 0.8.0 and latex2sympy2_extended 1.10.2 pass positive/negative controls in both teacher and actual learner reward paths. All new native CUDA arms use the pinned verl 0.5 source; the legacy full-clean run used the documented ROCm verl 0.9 adaptation, so this framework difference must accompany comparisons. That existing full-clean trajectory remains interrupted at its last verified remote upload, 467/480 updates, on its original inaccessible controller. No completed science comparison is claimed.
+All three new conditions initially received GPUs on Misha: clean1 uses an A100 80GB, clean10 an H100 80GB, and noisy90 an H200. Both clean arms are training with finite metrics and W&B uploads. Clean10 has passed full CPU validation of checkpoint 5 (311 finite model tensors, 29 Adam states, scheduler/RNG/dataloader state); clean1 is progressing toward its first save, with an independent checkpoint auditor active in the retained CPU supervision allocation. Noisy90 preparation stopped with 1,828/1,843 targets passing per-label checks and zero learner updates. The unused W&B record was deleted at the user's request; generated labels and the condition remain preserved. Isolated Math-Verify 0.8.0 and latex2sympy2_extended 1.10.2 pass positive/negative controls in both teacher and actual learner reward paths. All new native CUDA arms use the pinned verl 0.5 source; the legacy full-clean run used the documented ROCm verl 0.9 adaptation, so this framework difference must accompany comparisons. That existing full-clean trajectory remains interrupted at its last verified remote upload, 467/480 updates, on its original inaccessible controller. No completed science comparison is claimed.
 
 ## Events
 
