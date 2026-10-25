@@ -95,5 +95,19 @@ class SlurmControls(unittest.TestCase):
             science_slurm.worker(self.profile)
             loop.assert_not_called();stop.assert_not_called()
 
+    def test_gpu_budget_counts_actual_owned_time_across_leases(self):
+        self.controller.p.update(job_id=42,gpu_hour_cap=2)
+        self.controller.s['native_allocations']=[41]
+        uid=str(science_slurm.os.getuid())
+        with patch.object(science_slurm,'run',side_effect=lambda a: ('41|'+uid+'|1800|COMPLETED' if '--jobs=41' in a else '42|'+uid+'|1200|CANCELLED')):
+            self.assertEqual(self.controller.remaining_gpu_seconds(),4200)
+        self.assertEqual(self.controller.s['allocated_gpu_seconds'],3000)
+
+    def test_live_or_foreign_accounting_cannot_authorize_another_lease(self):
+        self.controller.p.update(job_id=42,gpu_hour_cap=2)
+        for record in ['42|foreign|1|COMPLETED','42|'+str(science_slurm.os.getuid())+'|1|RUNNING']:
+            with patch.object(science_slurm,'run',return_value=record):
+                with self.assertRaises(ValueError):self.controller.remaining_gpu_seconds()
+
 
 if __name__=='__main__':unittest.main()
