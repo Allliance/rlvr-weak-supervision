@@ -19,9 +19,9 @@ Inherit the existing [Qwen science protocol](../qwen3-science-2048.md): GRPO, 48
 
 Evaluate SCP difficult-50, SciBench and GPQA before training and every 25 updates; save full state every five updates and at the endpoint. Re-audit tokenizer filtering and exact question overlap per arm; report SCP both with and without overlapping questions. The existing Qwen SCP evaluation overlaps training and must remain labeled a contaminated diagnostic. Publish source revision, exact data/model hashes and execution calibration to W&B only after an allocated claim wins. No new run is created while unassigned. First-observed request time is approximate; exact message timestamp was unavailable.
 
-## Main Finding (Running)
+## Main Finding (Pending)
 
-Allocated on Bouchet/a1114u10n01; optimizer startup pending. Native verl 0.5.0/CUDA execution is a runtime adaptation of the existing ROCm science protocol; compare with that version difference disclosed.
+First allocation failed before optimizer update1 because Ray exceeded the Linux AF_UNIX socket path limit. The failure is diagnosed; only the machine-local RAY_TMPDIR was shortened. A real Linux socket bind with the full Ray session suffix and exact launch/holder shell checks pass. Requeued as Slurm30896870 within the unchanged 48 GPU-hour and eight-lease ceiling; the original W&B identity and scientific settings are preserved. Pending GPU allocation: no successful training restart is claimed yet. The queued Llama noisy90 profile received the same tested path correction without resubmission.
 
 ## Events
 
