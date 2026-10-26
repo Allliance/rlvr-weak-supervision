@@ -4,8 +4,8 @@ Experiment group: [Llama-3.2-3B-Instruct science comparison](group--llama3-2-3b-
 # Llama-3.2-3B-Instruct science · 10% clean
 
 Agent ID: `codex:01a16e48-bd19-7990-9cba-1dbf720faa54:/root`
-Machine ID: unassigned
-W&B: —
+Machine ID: `machine:sha256:62871dc8269c11486156183d163d794d9cc042c74f3a1faa1f4153f017c83ec6`
+W&B: [run](https://wandb.ai/alliance/Noisy-RLVR/runs/l32scienceclean10s42_20261024)
 
 ## Goal
 
@@ -19,9 +19,9 @@ Inherit the existing [Qwen science protocol](../qwen3-science-2048.md): GRPO, 48
 
 Evaluate SCP difficult-50, SciBench and GPQA before training and every 25 updates; save full state every five updates and at the endpoint. Re-audit tokenizer filtering and exact question overlap per arm; report SCP both with and without overlapping questions. The existing Qwen SCP evaluation overlaps training and must remain labeled a contaminated diagnostic. Publish source revision, exact data/model hashes and execution calibration to W&B only after an allocated claim wins. No new run is created while unassigned. First-observed request time is approximate; exact message timestamp was unavailable.
 
-## Main Finding
+## Main Finding (Running)
 
-Queued; no allocation or execution claim. Waiting for approved cluster budget and model/runtime preflight. Noisy conditions additionally require generated, verified incorrect targets. Existing full-clean Qwen results are not evidence for these new conditions.
+Allocated on Bouchet/a1114u10n01; optimizer startup pending. Native verl 0.5.0/CUDA execution is a runtime adaptation of the existing ROCm science protocol; compare with that version difference disclosed.
 
 ## Events
 
