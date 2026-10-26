@@ -14,8 +14,8 @@ Science groups: [Llama3.2-3B-Instruct](2026-10-24/group--llama3-2-3b-instruct-sc
 
 | Priority | Experiment | Resources | Host | Claim | Job | Started | Ended | W&B | Status |
 |---|---|---|---|---|---|---|---|---|---|
+| 10 | [Llama3.2-3B-Instruct-science-clean10](2026-10-24/llama3-2-3b-instruct-science-clean10.md) | gpu=1; vram=179GiB; cpu=16; ram=192GiB | Bouchet/a1114u10n01 | 62871dc8269c1148:95b3cea720614b7ba0846783b07b779f | 30601547 | 2026-10-26T13:25:42+00:00 | — | [run](https://wandb.ai/alliance/Noisy-RLVR/runs/l32scienceclean10s42_20261024) | training; 331/480 updates |
 | 10 | [Llama3.2-3B-Instruct-science-clean1](2026-10-24/llama3-2-3b-instruct-science-clean1.md) | gpu=1; vram=179GiB; cpu=16; ram=192GiB | Bouchet/a1114u10n01 | 62871dc8269c1148:5330dbce12464d2fbccb0e23a438896e | 30601548 | 2026-10-26T13:52:17+00:00 | — | [run](https://wandb.ai/alliance/Noisy-RLVR/runs/l32scienceclean1s42_20261024) | training; 328/480 updates |
-| 10 | [Llama3.2-3B-Instruct-science-clean10](2026-10-24/llama3-2-3b-instruct-science-clean10.md) | gpu=1; vram=179GiB; cpu=16; ram=192GiB | Bouchet/a1114u10n01 | 62871dc8269c1148:95b3cea720614b7ba0846783b07b779f | 30601547 | 2026-10-26T13:25:42+00:00 | — | [run](https://wandb.ai/alliance/Noisy-RLVR/runs/l32scienceclean10s42_20261024) | training; 322/480 updates |
 | 1 | [Qwen3-1.7B science 2048](qwen3-science-2048.md) | gpu=1; vram=288GiB; cpu=16; ram=128GiB | aac16-ele-priv-ctl-2 | b658f544cc6b2f70:science2048-20261022 | 49923 | 2026-10-22T04:30:50+00:00 | — | [run](https://forge.coreweave.com/wandb/alliance/Noisy-RLVR/runs/q3science2048s42_20261022) | Attention required: W&B crashed; last remote upload 467/480 on Oct22; controller/allocation inaccessible from Misha and Bouchet; checkpoints unverified; preserve owner claim |
 
 ## Finished Experiments
