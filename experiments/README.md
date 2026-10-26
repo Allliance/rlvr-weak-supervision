@@ -8,7 +8,6 @@ Science groups: [Llama3.2-3B-Instruct](2026-10-24/group--llama3-2-3b-instruct-sc
 
 | Priority | Experiment | Resources | Host | Claim | Job | Started | Ended | W&B | Status |
 |---|---|---|---|---|---|---|---|---|---|
-| 11 | [Llama-3.2-3B-Instruct science · full clean](2026-10-24/llama3-2-3b-instruct-science-full-clean.md) | gpu=1; vram=179GiB; cpu=16; ram=192GiB | — | — | — | — | — | — | Candidate 62871dc8269c1148/30601546 submitted; awaiting allocation and calibrated startup |
 | 12 | [Llama-3.2-3B-Instruct science · 10% clean](2026-10-24/llama3-2-3b-instruct-science-clean10.md) | gpu=1; vram=179GiB; cpu=16; ram=192GiB | — | — | — | — | — | — | Candidate 62871dc8269c1148/30601547 submitted; awaiting allocation and calibrated startup |
 | 13 | [Llama-3.2-3B-Instruct science · 90% noisy pool](2026-10-24/llama3-2-3b-instruct-science-noisy90.md) | gpu=1; vram=179GiB; cpu=16; ram=192GiB | — | — | — | — | — | — | Candidate 62871dc8269c1148/30609819 submitted; awaiting allocation and calibrated startup |
 | 14 | [Llama-3.2-3B-Instruct science · 1% clean](2026-10-24/llama3-2-3b-instruct-science-clean1.md) | gpu=1; vram=179GiB; cpu=16; ram=192GiB | — | — | — | — | — | — | Candidate 62871dc8269c1148/30601548 submitted; awaiting allocation and calibrated startup |
@@ -17,6 +16,7 @@ Science groups: [Llama3.2-3B-Instruct](2026-10-24/group--llama3-2-3b-instruct-sc
 
 | Priority | Experiment | Resources | Host | Claim | Job | Started | Ended | W&B | Status |
 |---|---|---|---|---|---|---|---|---|---|
+| 10 | [Llama3.2-3B-Instruct-science-full-clean](2026-10-24/llama3-2-3b-instruct-science-full-clean.md) | gpu=1; vram=179GiB; cpu=16; ram=192GiB | Bouchet/a1114u10n01 | 62871dc8269c1148:c58bb6d4dfeb4a65906fdac243b84759 | 30601546 | 2026-10-26T12:56:51+00:00 | — | — | allocated; logging initialization; 0/480 updates |
 | 1 | [Qwen3-1.7B science 2048](qwen3-science-2048.md) | gpu=1; vram=288GiB; cpu=16; ram=128GiB | aac16-ele-priv-ctl-2 | b658f544cc6b2f70:science2048-20261022 | 49923 | 2026-10-22T04:30:50+00:00 | — | [run](https://forge.coreweave.com/wandb/alliance/Noisy-RLVR/runs/q3science2048s42_20261022) | Attention required: W&B crashed; last remote upload 467/480 on Oct22; controller/allocation inaccessible from Misha and Bouchet; checkpoints unverified; preserve owner claim |
 
 ## Finished Experiments
