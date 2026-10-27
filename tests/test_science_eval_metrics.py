@@ -2,6 +2,7 @@ import importlib.util
 from pathlib import Path
 from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 
 spec = importlib.util.spec_from_file_location(
     'metrics', Path(__file__).parents[1] / 'tools/science_eval_metrics.py')
@@ -72,6 +73,29 @@ class ValidationMetrics(unittest.TestCase):
         self.assertEqual(result['val-core/scibench/reward/mean@2'], 0)
         self.assertAlmostEqual(result['eval/scibench/accuracy'], 1 / 3)
         self.assertEqual(result['eval/scibench/count'], 6)
+
+    def test_logging_finishes_before_actor_returns_or_raises(self):
+        events = []
+        module = SimpleNamespace(process_validation_metrics=lambda *a: {})
+
+        class Trainer:
+            def _validate(self):
+                return {}
+
+            def fit(self, fail=False):
+                events.append('fit')
+                if fail:
+                    raise ValueError('training failure')
+                return 'result'
+
+        wandb = SimpleNamespace(run=object(), finish=lambda exit_code: events.append(exit_code))
+        metrics.install_validation_reporting(module, Trainer)
+        with patch.dict('sys.modules', {'wandb': wandb}):
+            self.assertEqual(Trainer().fit(), 'result')
+            self.assertEqual(events, ['fit', 0])
+            with self.assertRaisesRegex(ValueError, 'training failure'):
+                Trainer().fit(fail=True)
+            self.assertEqual(events, ['fit', 0, 'fit', 1])
 
 
 if __name__ == '__main__':

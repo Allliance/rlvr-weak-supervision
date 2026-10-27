@@ -85,3 +85,30 @@ def install_validation_reporting(trainer_module=None, trainer_class=None):
     validate._science_row_metrics = True
     trainer_module.process_validation_metrics = process
     trainer_class._validate = validate
+    if hasattr(trainer_class, 'fit') and not getattr(trainer_class.fit, '_science_finish_logging', False):
+        original_fit = trainer_class.fit
+
+        @wraps(original_fit)
+        def fit(self, *args, **kwargs):
+            exit_code = 0
+            try:
+                return original_fit(self, *args, **kwargs)
+            except BaseException:
+                exit_code = 1
+                raise
+            finally:
+                try:
+                    import wandb
+                except ImportError:
+                    wandb = None
+                if wandb is not None and wandb.run is not None:
+                    # Ray can tear down the logging service before buffered final
+                    # updates reach W&B. Finish inside the trainer actor first.
+                    try:
+                        wandb.finish(exit_code=exit_code)
+                    except Exception:
+                        if not exit_code:
+                            raise
+
+        fit._science_finish_logging = True
+        trainer_class.fit = fit
