@@ -8,13 +8,13 @@ Science groups: [Llama3.2-3B-Instruct](2026-10-24/group--llama3-2-3b-instruct-sc
 
 | Priority | Experiment | Resources | Host | Claim | Job | Started | Ended | W&B | Status |
 |---|---|---|---|---|---|---|---|---|---|
-| 10 | [Llama3.2-3B-Instruct-science-full-clean](2026-10-24/llama3-2-3b-instruct-science-full-clean.md) | gpu=1; vram=179GiB; cpu=16; ram=192GiB | Bouchet/a1114u10n01 | 62871dc8269c1148:c58bb6d4dfeb4a65906fdac243b84759 | 30896870 | 2026-10-26T12:56:51+00:00 | — | [run](https://wandb.ai/alliance/Noisy-RLVR/runs/l32sciencefullcleans42_20261024) | pending_allocation; 0/480 updates |
 | 13 | [Llama-3.2-3B-Instruct science · 90% noisy pool](2026-10-24/llama3-2-3b-instruct-science-noisy90.md) | gpu=1; vram=179GiB; cpu=16; ram=192GiB | — | — | — | — | — | — | Candidate 62871dc8269c1148/30609819 submitted; awaiting allocation and calibrated startup |
 
 ## Running Experiments
 
 | Priority | Experiment | Resources | Host | Claim | Job | Started | Ended | W&B | Status |
 |---|---|---|---|---|---|---|---|---|---|
+| 10 | [Llama3.2-3B-Instruct-science-full-clean](2026-10-24/llama3-2-3b-instruct-science-full-clean.md) | gpu=1; vram=179GiB; cpu=16; ram=192GiB | jump/aac16-ele-priv-ctl-2 | b658f544cc6b2f70:99dac83470a844b2028a4ddb28b37e10 | 50011 | 2026-10-26T12:56:51+00:00 | — | [run](https://wandb.ai/alliance/Noisy-RLVR/runs/l32sciencefullcleans42_20261024) | Allocated on gpu-35; exact2048 train/939 eval rows and full pretrained model CPU-validated; optimizer startup pending |
 
 ## Finished Experiments
 
