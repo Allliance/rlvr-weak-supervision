@@ -4,8 +4,8 @@ Experiment group: [Llama-3.2-3B-Instruct science comparison](group--llama3-2-3b-
 # Llama-3.2-3B-Instruct science · 90% noisy pool
 
 Agent ID: `codex:01a16e48-bd19-7990-9cba-1dbf720faa54:/root`
-Machine ID: unassigned
-W&B: —
+Machine ID: `machine:sha256:b658f544cc6b2f70861219809f19614c038f18e4dad79c97105c05512f65bfeb`
+W&B: [run](https://wandb.ai/alliance/Noisy-RLVR/runs/7871b97da8cf4ea7a0853223f8d41d79)
 
 ## Goal
 
