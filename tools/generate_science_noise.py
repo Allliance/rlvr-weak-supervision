@@ -9,7 +9,7 @@ import subprocess
 import sys
 import time
 
-from prepare_science_comparison import prepare, split_indices
+from prepare_science_comparison import prepare, split_indices, verify_incorrect
 
 
 def boxed_answer(text):
@@ -35,6 +35,11 @@ print(json.dumps([m.compute_score(boxed,reference),m.compute_score(boxed,target)
     result=subprocess.run([sys.executable,'-c',code,str(scorer)],input=json.dumps([target,reference,reference.replace('\\\\','\\')]),
         capture_output=True,text=True,check=True,timeout=12)
     return json.loads(result.stdout.strip().splitlines()[-1])
+
+
+def verified_target(target, reference):
+    """Require the final dataset audit before accepting a generated label."""
+    return scores(target, reference) == [0, 1, 0] and verify_incorrect(target, reference)
 
 
 def main():
@@ -108,9 +113,9 @@ def main():
                     for candidate in result.outputs:
                         target=boxed_answer(candidate.text)
                         if not target or target.strip()==reference.strip():continue
-                        try:wrong,self_score,normalized_wrong=scores(target,reference)
+                        try:accepted=verified_target(target,reference)
                         except subprocess.TimeoutExpired:continue
-                        if wrong!=0 or normalized_wrong!=0 or self_score!=1:continue
+                        if not accepted:continue
                         item=dict(source_row=index,target=target,verified_incorrect=True,
                             verifier='training Math-Verify rejects target against raw and unescaped reference and accepts target against itself',
                             prompt_sha256=hashlib.sha256(json.dumps(rows[index]['prompt'],sort_keys=True).encode()).hexdigest(),
