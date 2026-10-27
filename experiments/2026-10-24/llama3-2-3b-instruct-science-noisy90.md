@@ -28,3 +28,7 @@ Queued; no allocation or execution claim. Waiting for approved cluster budget an
 | Event | Datetime | Action taken | Resolved |
 |---|---|---|---|
 | Requested | 2026-10-24T10:31:00-04:00 | Registered this condition in the live science queue. | Yes |
+
+## Approved noise preparation, 2026-10-27
+
+All1843 fixed targets passed the complete independent audit before training. Composition: 1834 teacher targets and 9 user-approved deterministic synthetic exceptions. The exact approved rows and targets, rejected ambiguous candidates, unchanged source/question fingerprints, final dataset checksum and actual code hashes are preserved in the run provenance. The original teacher sample cap remains32 for ordinary rows; Qwen has one accepted target from the separately approved bounded three-question fallback. [Shared decision record](../../.agents/science-run-decisions.md).

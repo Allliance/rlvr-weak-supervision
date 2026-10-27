@@ -4,8 +4,8 @@ Experiment group: [Qwen3-1.7B science comparison](group--qwen3-1-7b-science-2048
 # Qwen3-1.7B science · 90% noisy pool
 
 Agent ID: `codex:01a16e48-bd19-7990-9cba-1dbf720faa54:/root`
-Machine ID: `machine:sha256:54d325dcb906a630c9c82e39451b3688533305d1a7a627d37f4c72734a0f290b`
-W&B: — (unused preparation record deleted at user request)
+Machine ID: `machine:sha256:b658f544cc6b2f70861219809f19614c038f18e4dad79c97105c05512f65bfeb`
+W&B: [run](https://wandb.ai/alliance/Noisy-RLVR/runs/da42a1ee43f34f918ef362d260482dfe)
 
 ## Goal
 
@@ -28,3 +28,7 @@ Preparation failed after exhausting the documented 32-candidate-per-question bud
 | Event | Datetime | Action taken | Resolved |
 |---|---|---|---|
 | Requested | 2026-10-24T10:31:00-04:00 | Registered this condition in the live science queue. | Yes |
+
+## Approved noise preparation, 2026-10-27
+
+All1843 fixed targets passed the complete independent audit before training. Composition: 1841 teacher targets and 2 user-approved deterministic synthetic exceptions. The exact approved rows and targets, rejected ambiguous candidates, unchanged source/question fingerprints, final dataset checksum and actual code hashes are preserved in the run provenance. The original teacher sample cap remains32 for ordinary rows; Qwen has one accepted target from the separately approved bounded three-question fallback. [Shared decision record](../../.agents/science-run-decisions.md).
