@@ -8,7 +8,7 @@ Science groups: [Llama3.2-3B-Instruct](2026-10-24/group--llama3-2-3b-instruct-sc
 
 | Priority | Experiment | Resources | Host | Claim | Job | Started | Ended | W&B | Status |
 |---|---|---|---|---|---|---|---|---|---|
-| 13 | [Llama-3.2-3B-Instruct science · 90% noisy pool](2026-10-24/llama3-2-3b-instruct-science-noisy90.md) | gpu=1; vram=179GiB; cpu=16; ram=192GiB | — | — | — | — | — | — | Candidate 62871dc8269c1148/30609819 submitted; awaiting allocation and calibrated startup |
+| 13 | [Llama-3.2-3B-Instruct science · 90% noisy pool](2026-10-24/llama3-2-3b-instruct-science-noisy90.md) | gpu=1; vram=179GiB; cpu=16; ram=192GiB | — | — | — | — | — | — | Authorized unfinished science preparation; source STOP latched and source allocations terminal; verified cached labels preserved |
 
 ## Running Experiments
 
