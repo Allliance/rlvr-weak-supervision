@@ -13,9 +13,9 @@ Science groups: [Llama3.2-3B-Instruct](2026-10-24/group--llama3-2-3b-instruct-sc
 
 | Priority | Experiment | Resources | Host | Claim | Job | Started | Ended | W&B | Status |
 |---|---|---|---|---|---|---|---|---|---|
+| 10 | [Llama3.2-3B-Instruct-science-full-clean](2026-10-24/llama3-2-3b-instruct-science-full-clean.md) | gpu=1; vram=288GiB; cpu=16; ram=128GiB | jump/aac16-ele-priv-ctl-2 | b658f544cc6b2f70:99dac83470a844b2028a4ddb28b37e10 | 50011 | 2026-10-26T12:56:51+00:00 | — | [run](https://wandb.ai/alliance/Noisy-RLVR/runs/l32sciencefullcleans42_20261024) | training; 264/480 updates |
 | 10 | [Qwen3-1.7B-science-noisy90](2026-10-24/qwen3-1-7b-science-noisy90.md) | gpu=1; vram=288GiB; cpu=16; ram=128GiB | jump/aac16-ele-priv-ctl-2 | b658f544cc6b2f70:bebac11119cd7910e83f0eb23516ff86 | 50007 | 2026-10-24T16:27:27+00:00 | — | — | User-approved finite synthetic exceptions staged; independent full 1843-label audit on CPU; training remains gated; W&B uncreated |
 | 13 | [Llama-3.2-3B-Instruct science · 90% noisy pool](2026-10-24/llama3-2-3b-instruct-science-noisy90.md) | gpu=1; vram=288GiB; cpu=16; ram=128GiB | jump/aac16-ele-priv-ctl-2 | b658f544cc6b2f70:c098f52acad57b4dadd42d67e5492b18 | 50006 | 2026-10-27T18:11:16+00:00 | — | — | User-approved finite synthetic exceptions staged; independent full 1843-label audit on CPU; training remains gated; W&B uncreated |
-| 10 | [Llama3.2-3B-Instruct-science-full-clean](2026-10-24/llama3-2-3b-instruct-science-full-clean.md) | gpu=1; vram=288GiB; cpu=16; ram=128GiB | jump/aac16-ele-priv-ctl-2 | b658f544cc6b2f70:99dac83470a844b2028a4ddb28b37e10 | 50011 | 2026-10-26T12:56:51+00:00 | — | [run](https://wandb.ai/alliance/Noisy-RLVR/runs/l32sciencefullcleans42_20261024) | training; 257/480 updates |
 
 ## Finished Experiments
 
