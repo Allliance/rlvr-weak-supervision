@@ -16,6 +16,23 @@ class ValidationMetrics(unittest.TestCase):
         self.assertEqual(result['eval/scibench/correct'], 2)
         self.assertAlmostEqual(result['eval/scibench/accuracy'], 1 / 3)
 
+    def test_native_v1_base_class_hook_reports_science_mean_and_step(self):
+        module = SimpleNamespace(process_validation_metrics=lambda *a: {})
+
+        class NativeTrainer:
+            global_steps = 475
+
+            def _validate(self):
+                module.process_validation_metrics(metrics.SCIENCE_SOURCES, ['a', 'b', 'c'],
+                                                  {'reward': [1, 0, 1]})
+                return {'native_metric': 1}
+
+        metrics.install_validation_reporting(module, NativeTrainer)
+        result = NativeTrainer()._validate()
+        self.assertAlmostEqual(result['eval/science/mean_accuracy'], 2 / 3)
+        self.assertEqual(result['eval/science/step'], 475)
+        self.assertEqual(result['native_metric'], 1)
+
     def test_sources_and_bad_scores(self):
         result = metrics.row_metrics(['a', 'b', 'a'], [1, 0, 0])
         self.assertEqual(result['eval/a/accuracy'], 0.5)

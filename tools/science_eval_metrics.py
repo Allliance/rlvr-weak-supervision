@@ -2,6 +2,7 @@
 from collections import defaultdict
 from contextvars import ContextVar
 from functools import wraps
+import importlib
 import math
 
 SCIENCE_SOURCES = ('test-math-scp-difficult', 'scibench', 'stem__gpqa_diamond')
@@ -26,7 +27,7 @@ def row_metrics(data_sources, scores):
     return metrics
 
 
-def install_validation_reporting(trainer_module=None):
+def install_validation_reporting(trainer_module=None, trainer_class=None):
     """Install in the trainer process for either supported native verl runtime.
 
     Native verl groups identical decoded prompts before reporting mean@N. When
@@ -34,12 +35,22 @@ def install_validation_reporting(trainer_module=None):
     only the repeated questions. Keep those diagnostics and add a row mean.
     """
     if trainer_module is None:
-        from verl.trainer.ppo import ray_trainer as trainer_module
-    if getattr(trainer_module.RayPPOTrainer._validate, '_science_row_metrics', False):
+        from verl.trainer.ppo import ray_trainer
+        install_validation_reporting(ray_trainer, ray_trainer.RayPPOTrainer)
+        try:
+            native = importlib.import_module('verl.trainer.ppo.v1.trainer_base')
+        except ModuleNotFoundError as error:
+            if not error.name.startswith('verl.trainer.ppo.v1'):
+                raise
+        else:
+            install_validation_reporting(native, native.PPOTrainer)
+        return
+    trainer_class = trainer_class or trainer_module.RayPPOTrainer
+    if getattr(trainer_class._validate, '_science_row_metrics', False):
         return
     captured = ContextVar('science_validation_row_metrics', default=None)
     original_process = trainer_module.process_validation_metrics
-    original_validate = trainer_module.RayPPOTrainer._validate
+    original_validate = trainer_class._validate
 
     @wraps(original_process)
     def process(data_sources, sample_inputs, infos_dict, *args, **kwargs):
@@ -73,4 +84,4 @@ def install_validation_reporting(trainer_module=None):
 
     validate._science_row_metrics = True
     trainer_module.process_validation_metrics = process
-    trainer_module.RayPPOTrainer._validate = validate
+    trainer_class._validate = validate
