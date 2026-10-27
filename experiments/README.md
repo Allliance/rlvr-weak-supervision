@@ -8,6 +8,7 @@ Science groups: [Llama3.2-3B-Instruct](2026-10-24/group--llama3-2-3b-instruct-sc
 
 | Priority | Experiment | Resources | Host | Claim | Job | Started | Ended | W&B | Status |
 |---|---|---|---|---|---|---|---|---|---|
+| 10 | [Qwen3-1.7B-science-noisy90](2026-10-24/qwen3-1-7b-science-noisy90.md) | gpu=1; vram=80GiB; cpu=16; ram=128GiB | — | — | — | 2026-10-24T16:27:27+00:00 | — | — | Authorized unfinished science preparation; source STOP latched and source allocations terminal; verified cached labels preserved |
 
 ## Running Experiments
 
@@ -25,4 +26,3 @@ Science groups: [Llama3.2-3B-Instruct](2026-10-24/group--llama3-2-3b-instruct-sc
 | 10 | [Llama3.2-3B-Instruct-science-clean1](2026-10-24/llama3-2-3b-instruct-science-clean1.md) | gpu=1; vram=179GiB; cpu=16; ram=192GiB | Bouchet/a1114u10n01 | 62871dc8269c1148:5330dbce12464d2fbccb0e23a438896e | 30601548 | 2026-10-26T13:52:17+00:00 | 2026-10-26T22:10:21+00:00 | [run](https://wandb.ai/alliance/Noisy-RLVR/runs/l32scienceclean1s42_20261024) | completed; 480/480 updates |
 | 10 | [Qwen3-1.7B-science-clean1](2026-10-24/qwen3-1-7b-science-clean1.md) | gpu=1; vram=80GiB; cpu=16; ram=128GiB | Misha/r817u15n02 | 54d325dcb906a630:6da915e5ad9646a6b282fe2081a9ca55 | 3066243 | 2026-10-24T15:34:43+00:00 | 2026-10-25T13:33:15+00:00 | [run](https://wandb.ai/alliance/Noisy-RLVR/runs/q3scienceclean1s42_20261024) | completed; 480/480 updates |
 | 10 | [Qwen3-1.7B-science-clean10](2026-10-24/qwen3-1-7b-science-clean10.md) | gpu=1; vram=80GiB; cpu=16; ram=128GiB | Misha/r817u15n02 | 54d325dcb906a630:7d0cd971bf284470aa6b89548433f6a9 | 3066242 | 2026-10-24T15:32:43+00:00 | 2026-10-25T05:06:37+00:00 | [run](https://wandb.ai/alliance/Noisy-RLVR/runs/q3scienceclean10s42_20261024) | completed; 480/480 updates |
-| 10 | [Qwen3-1.7B-science-noisy90](2026-10-24/qwen3-1-7b-science-noisy90.md) | gpu=1; vram=80GiB; cpu=16; ram=128GiB | Misha/r817u15n02 | 54d325dcb906a630:3fa71d2bc1494d9a88ca7cdfcb1bf8cd | 3066735 | 2026-10-24T16:27:27+00:00 | 2026-10-24T18:55:58+00:00 | — | needs_attention; preparing 1828/1843 verified noisy labels; 0/480 updates; unused W&B preparation record deleted at user request |
