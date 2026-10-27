@@ -10,6 +10,17 @@ Evaluate the published SCP difficult-50, SciBench-692 and GPQA Diamond-198 scien
 
 AMD execution uses the existing `amdagi/verl-dev` image pinned by digest in the local machine profile, its installed verl 0.9.0.dev0, Torch 2.12 ROCm 7.14, and vLLM 0.22 development runtime. The repository vendors older verl 0.4.1 with CUDA/vLLM internals incompatible with this GPU’s available runtimes. Scientific settings are explicitly carried over into native verl; this is a framework-version adaptation, not an exact reproduction of the authors’ environment. FSDP2, microbatch four, log-probability microbatch eight, eager inference, one 288-GiB MI355X, 16 CPUs, 128-GiB container RAM. Retain gradient checkpointing. Runtime calibration must verify finite optimizer updates, peak memory, throughput, checkpoint completeness, and remote W&B uploads.
 
+Evaluation reporting (2026-10-27): `eval/<data_source>/accuracy` is the binary
+verifier mean over every eligible evaluation row; `/correct` and `/count` expose
+its denominator. SciBench has 692 rows and 690 distinct decoded prompts. Native
+verl's `val-core/scibench/reward/mean@2` covers only the two duplicated prompts;
+it must not be interpreted as overall SciBench accuracy. Those diagnostics remain
+available. `eval/science/mean_accuracy` is the equal-weight arithmetic mean of
+SCP, SciBench and GPQA row accuracies, using `eval/science/step` as its evaluation
+step. It includes the SCP overlap caveat above; individual benchmarks remain
+available for interpretation. This reporting change does not alter evaluation
+questions, inference, verifier scores, or training.
+
 One durable controller checks progress every 60 seconds and publishes the live queue every ten minutes; systemd independently restarts failed supervision. Recovery requires complete checkpoint files, preserves this protocol, and allows at most three failures in six hours and two failures without checkpoint progress. At most three 24-hour allocation renewals; never overlap allocations. `STOP` latches recovery and renewal, stops only this exact container and retains the allocation until expiry. No old stopped experiment may restart. After a checkpoint rollback, re-executed optimizer counters are restored correctly; W&B may suppress replayed historical step numbers, so remote history can retain the abandoned attempt’s last few pre-checkpoint-save metrics. Final evaluation and checkpoint identity determine the reported model outcome; bitwise rollout replay is not promised. Any exhausted recovery or non-finite metrics requires diagnosis.
 
 Run: [W&B](https://forge.coreweave.com/wandb/alliance/Noisy-RLVR/runs/q3science2048s42_20261022). Operational paths, scheduler IDs, logs, telemetry, data audits and generated state stay outside Git. The live queue carries current progress and outcome.

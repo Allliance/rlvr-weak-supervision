@@ -594,7 +594,8 @@ def compute_score_batch(data_sources, solution_strs, ground_truths, extra_infos)
             data_sources, solution_strs, ground_truths, extra_infos, strict=True
         ):
             score = math_verify.compute_score(solution_str, _process_ground_truth(ground_truth))
-            results.append({"score": score, "ground_truth": ground_truth, "reward_method": "RULE_BASED"})
+            results.append({"score": score, "ground_truth": ground_truth,
+                            "data_source": data_source, "reward_method": "RULE_BASED"})
 
         return results
 

@@ -51,7 +51,7 @@ fi
 strategy=fsdp2
 reward_args=("reward.custom_reward_function.path=$code/reward_function.py" reward.custom_reward_function.name=compute_score reward.num_workers=4)
 ray_cpu=ray_kwargs.ray_init.num_cpus=16
-dataset_args=()
+dataset_args=("data.custom_cls.path=$code/tools/science_dataset.py" data.custom_cls.name=NoThinkingDataset)
 seed_arg=data.seed=42
 rollout_seed=actor_rollout_ref.rollout.seed=42
 if [[ ${SCIENCE_RUNTIME:-} == verl05 ]]; then
