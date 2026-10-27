@@ -15,7 +15,7 @@ Science groups: [Llama3.2-3B-Instruct](2026-10-24/group--llama3-2-3b-instruct-sc
 
 | Priority | Experiment | Resources | Host | Claim | Job | Started | Ended | W&B | Status |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | [Qwen3-1.7B science 2048](qwen3-science-2048.md) | gpu=1; vram=288GiB; cpu=16; ram=128GiB | jump/aac16-ele-priv-ctl-2 | b658f544cc6b2f70:1749e7d3ae0f12b87092123c3d82ec8e | 50011 | 2026-10-22T04:30:50+00:00 | — | [run](https://forge.coreweave.com/wandb/alliance/Noisy-RLVR/runs/q3science2048s42_20261022) | training; 466/480 updates |
+| 1 | [Qwen3-1.7B science 2048](qwen3-science-2048.md) | gpu=1; vram=288GiB; cpu=16; ram=128GiB | jump/aac16-ele-priv-ctl-2 | b658f544cc6b2f70:1749e7d3ae0f12b87092123c3d82ec8e | 50011 | 2026-10-22T04:30:50+00:00 | — | [run](https://forge.coreweave.com/wandb/alliance/Noisy-RLVR/runs/q3science2048s42_20261022) | training; 474/480 updates |
 
 ## Finished Experiments
 
