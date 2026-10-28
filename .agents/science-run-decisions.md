@@ -11,3 +11,8 @@ Noisy training starts only after the complete dataset audit, exact CPU model/con
 - qwen3-1-7b-science-noisy90: [run](https://wandb.ai/alliance/Noisy-RLVR/runs/da42a1ee43f34f918ef362d260482dfe).
 
 - llama3-2-3b-instruct-science-noisy90: [run](https://wandb.ai/alliance/Noisy-RLVR/runs/7871b97da8cf4ea7a0853223f8d41d79).
+
+## Finished full-clean optimizer retirement, 2026-10-28
+
+Both Qwen3-1.7B and Llama3.2-3B-Instruct science full-clean completed 480/480 updates. The user authorized removing local optimizer state from finished runs that no longer need resuming. Their model weights and other non-optimizer checkpoint files are preserved on jump; original and migrated hard links were reconciled. Existing HF full-state checkpoint copies were not deleted, and local full-state publishers for these finished runs are parked. Both unfinished noisy science arms retain their full optimizer state. The combined math/science cleanup removed 555.0 GiB of unique optimizer data, with unchanged model files and protected unfinished optimizer files verified.
+
