@@ -13,7 +13,7 @@ Science groups: [Llama3.2-3B-Instruct](2026-10-24/group--llama3-2-3b-instruct-sc
 
 | Priority | Experiment | Resources | Host | Claim | Job | Started | Ended | W&B | Status |
 |---|---|---|---|---|---|---|---|---|---|
-| 10 | [Llama3.2-3B-Instruct-science-noisy90](2026-10-24/llama3-2-3b-instruct-science-noisy90.md) | gpu=1; vram=288GiB; cpu=16; ram=128GiB | jump/aac16-ele-priv-ctl-2 | b658f544cc6b2f70:c098f52acad57b4dadd42d67e5492b18 | 50006 | 2026-10-27T21:18:49+00:00 | — | [run](https://wandb.ai/alliance/Noisy-RLVR/runs/7871b97da8cf4ea7a0853223f8d41d79) | Checkpoint-safe handover b658f544cc6b2f70; Checkpoint 295 fully validated; old workload stopped and allocation ended; awaiting replacement; candidate job 50022 |
+| 10 | [Llama3.2-3B-Instruct-science-noisy90](2026-10-24/llama3-2-3b-instruct-science-noisy90.md) | gpu=1; vram=288GiB; cpu=16; ram=128GiB | jump/aac16-ele-priv-ctl-2 | 02a6060f940167d95e83ccc4bb17b3ece3c15ff00f435694 | 50022 | 2026-10-27T21:18:49+00:00 | — | [run](https://wandb.ai/alliance/Noisy-RLVR/runs/7871b97da8cf4ea7a0853223f8d41d79) | Fresh allocation assigned; verified full checkpoint 295; resuming original logging identity |
 | 10 | [Qwen3-1.7B-science-noisy90](2026-10-24/qwen3-1-7b-science-noisy90.md) | gpu=1; vram=288GiB; cpu=16; ram=128GiB | jump/aac16-ele-priv-ctl-2 | 97ffb03ad73d92a6770cc8b7a878b7cab7ecd95923a30774 | 50021 | 2026-10-27T21:05:23+00:00 | — | [run](https://wandb.ai/alliance/Noisy-RLVR/runs/da42a1ee43f34f918ef362d260482dfe) | Fresh allocation assigned; verified full checkpoint 325; resuming original logging identity |
 
 ## Finished Experiments
