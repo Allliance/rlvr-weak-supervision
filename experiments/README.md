@@ -13,9 +13,9 @@ Science groups: [Llama3.2-3B-Instruct](2026-10-24/group--llama3-2-3b-instruct-sc
 
 | Priority | Experiment | Resources | Host | Claim | Job | Started | Ended | W&B | Status |
 |---|---|---|---|---|---|---|---|---|---|
+| 10 | [Llama3.2-3B-Instruct-science-noisy90](2026-10-24/llama3-2-3b-instruct-science-noisy90.md) | gpu=1; vram=288GiB; cpu=16; ram=128GiB | jump/aac16-ele-priv-ctl-2 | b658f544cc6b2f70:c098f52acad57b4dadd42d67e5492b18 | 50006 | 2026-10-27T21:18:49+00:00 | — | [run](https://wandb.ai/alliance/Noisy-RLVR/runs/7871b97da8cf4ea7a0853223f8d41d79) | training; 162/480 updates |
 | 10 | [Qwen3-1.7B-science-noisy90](2026-10-24/qwen3-1-7b-science-noisy90.md) | gpu=1; vram=288GiB; cpu=16; ram=128GiB | jump/aac16-ele-priv-ctl-2 | b658f544cc6b2f70:bebac11119cd7910e83f0eb23516ff86 | 50007 | 2026-10-27T21:05:23+00:00 | — | [run](https://wandb.ai/alliance/Noisy-RLVR/runs/da42a1ee43f34f918ef362d260482dfe) | training; 186/480 updates |
 | 10 | [Llama3.2-3B-Instruct-science-full-clean](2026-10-24/llama3-2-3b-instruct-science-full-clean.md) | gpu=1; vram=288GiB; cpu=16; ram=128GiB | jump/aac16-ele-priv-ctl-2 | b658f544cc6b2f70:99dac83470a844b2028a4ddb28b37e10 | 50011 | 2026-10-26T12:56:51+00:00 | — | [run](https://wandb.ai/alliance/Noisy-RLVR/runs/l32sciencefullcleans42_20261024) | training; 455/480 updates |
-| 10 | [Llama3.2-3B-Instruct-science-noisy90](2026-10-24/llama3-2-3b-instruct-science-noisy90.md) | gpu=1; vram=288GiB; cpu=16; ram=128GiB | jump/aac16-ele-priv-ctl-2 | b658f544cc6b2f70:c098f52acad57b4dadd42d67e5492b18 | 50006 | 2026-10-27T21:18:49+00:00 | — | [run](https://wandb.ai/alliance/Noisy-RLVR/runs/7871b97da8cf4ea7a0853223f8d41d79) | training; 155/480 updates |
 
 ## Finished Experiments
 
